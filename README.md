@@ -60,6 +60,8 @@ log.LogInformation("The current values are {Fizz} and {Buzz}", fizz, buzz);
 
 This records an event like:
 
+| Property | Value |
+| -------- | ----- |
 | `Message` | `"The current values are 3 and 5"` |
 | `Fizz` | `3` |
 | `Buzz` | `5` |
