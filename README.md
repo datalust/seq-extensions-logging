@@ -73,7 +73,7 @@ The `AddSeq()` method exposes some basic options for controlling the connection 
 | Parameter | Description | Example value |
 | --------- | ----------- | ------------- |
 | `apiKey` | A Seq [API key](http://docs.getseq.net/docs/api-keys) to authenticate or tag messages from the logger | `"1234567890"` |
-| `levelOverrides` | A dictionary mapping logger name prefixes to minimum logging levels | `new Dictionary<string,string>{ ["Microsoft"] = LogLevel.Warning }` |
+| `levelOverrides` | A dictionary mapping logger name prefixes to minimum logging levels | `new Dictionary<string,LogLevel>{ ["Microsoft"] = LogLevel.Warning }` |
 | `minimumLevel` | The level below which events will be suppressed (the default is `Information`) | `LogLevel.Trace` |
 
 ### Migrating to Serilog
