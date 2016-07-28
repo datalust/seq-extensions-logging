@@ -1,8 +1,8 @@
 # Seq.Extensions.Logging
 
-This package makes it a one-liner to configure ASP.NET Core logging (_Microsoft.Extensions.Logging_) to write structured log events to [Seq](https://getseq.net).
-
 Seq is an excellent match for the structured logging in .NET Core: for an example, see [the _dotnetconf_ deep dive session](https://channel9.msdn.com/Events/dotnetConf/2016/ASPNET-Core--deep-dive-on-building-a-real-website-with-todays-bits).
+
+This package makes it a one-liner to configure ASP.NET Core logging (_Microsoft.Extensions.Logging_) to write structured log events to [Seq](https://getseq.net).
 
 ### Getting started
 
@@ -77,6 +77,31 @@ The `AddSeq()` method exposes some basic options for controlling the connection 
 | `apiKey` | A Seq [API key](http://docs.getseq.net/docs/api-keys) to authenticate or tag messages from the logger | `"1234567890"` |
 | `levelOverrides` | A dictionary mapping logger name prefixes to minimum logging levels | `new Dictionary<string,LogLevel>{ ["Microsoft"] = LogLevel.Warning }` |
 | `minimumLevel` | The level below which events will be suppressed (the default is `Information`) | `LogLevel.Trace` |
+
+### JSON configuration
+
+The Seq server URL, API key and other settings can be read from JSON configuration if desired.
+
+In `appsettings.json` add a `"Seq"` property:
+
+```json
+{
+  "Seq": {
+    "ServerUrl": "http://localhost:5341",
+    "ApiKey": "1234567890",
+    "MinimumLevel": "Trace",
+    "LevelOverride": {
+      "Microsoft": "Warning"
+    }
+  }
+}
+```
+
+And then pass the configuration object to the `AddSeq()` method:
+
+```csharp
+        loggerFactory.AddSeq(configuration);
+```
 
 ### Migrating to Serilog
 
