@@ -45,11 +45,7 @@ class HomeController : Controller
 }
 ```
 
-Log messages will be sent to Seq in batches and be visible in the Seq user interface:
-
-(Image here).
-
-Observe that correlation identifiers added by the framework, like `RequestId`, are all exposed and fully-searchable in Seq.
+Log messages will be sent to Seq in batches and be visible in the Seq user interface. Observe that correlation identifiers added by the framework, like `RequestId`, are all exposed and fully-searchable in Seq.
 
 ### Logging with message templates
 

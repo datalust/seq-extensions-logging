@@ -1,6 +1,16 @@
 {
   "version": "1.0.0-*",
 
+  "description": "Add centralized structured log collection to ASP.NET Core apps with one line of code.",
+  "authors": [ "Datalust and Contributors" ],
+
+  "packOptions": {
+    "tags": [ "asp.net", "core", "logging" ],
+    "projectUrl": "https://github.com/datalust/seq-extensions-logging",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "iconUrl": "https://getseq.net/images/nuget/seq.png"
+  },
+
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Serilog": "2.2.1",
