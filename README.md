@@ -95,10 +95,10 @@ In `appsettings.json` add a `"Seq"` property:
 }
 ```
 
-And then pass the configuration object to the `AddSeq()` method:
+And then pass the configuration section to the `AddSeq()` method:
 
 ```csharp
-        loggerFactory.AddSeq(configuration);
+        loggerFactory.AddSeq(Configuration.GetSection("Seq"));
 ```
 
 ### Migrating to Serilog
