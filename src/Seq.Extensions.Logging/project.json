@@ -12,7 +12,6 @@
   },
 
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
     "Serilog": "2.2.1",
     "Serilog.Sinks.Seq": "3.0.1",
     "Serilog.Extensions.Logging": "1.2.0",
@@ -20,9 +19,7 @@
   },
 
   "frameworks": {
-    "netstandard1.6": {
-      "imports": "dnxcore50"
-    }
+    "netstandard1.3": {}
   },
 
   "buildOptions": {
