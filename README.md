@@ -23,9 +23,9 @@ In your `Startup` class's `Configure()` method, call `AddSeq()` on the provided 
 ```csharp
   public void Configure(IApplicationBuilder app,
                         IHostingEnvironment env,
-                        ILoggerFactory loggerfactory)
+                        ILoggerFactory loggerFactory)
   {
-      loggerfactory.AddSeq("http://localhost:5341");
+      loggerFactory.AddSeq("http://localhost:5341");
 ```
 
 The framework will inject `ILogger` instances into controllers and other classes:
