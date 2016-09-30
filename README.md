@@ -1,4 +1,4 @@
-# Seq.Extensions.Logging
+# Seq.Extensions.Logging [![Build status](https://ci.appveyor.com/api/projects/status/h7r1hv3cpd6e2ou3?svg=true)](https://ci.appveyor.com/project/datalust/seq-extensions-logging) [![NuGet Pre Release](https://img.shields.io/nuget/vpre/Seq.Extensions.Logging.svg)](https://nuget.org/packages/Seq.Extensions.Logging) [![Join the chat at https://gitter.im/datalust/seq](https://img.shields.io/gitter/room/datalust/seq.svg)](https://gitter.im/datalust/seq)
 
 [Seq](https://getseq.net) is an excellent match for the structured logging in .NET Core: for an example, see [the _dotnetconf_ deep dive session](https://channel9.msdn.com/Events/dotnetConf/2016/ASPNET-Core--deep-dive-on-building-a-real-website-with-todays-bits).
 
