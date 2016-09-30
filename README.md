@@ -1,10 +1,10 @@
 # Seq.Extensions.Logging
 
-Seq is an excellent match for the structured logging in .NET Core: for an example, see [the _dotnetconf_ deep dive session](https://channel9.msdn.com/Events/dotnetConf/2016/ASPNET-Core--deep-dive-on-building-a-real-website-with-todays-bits).
+[Seq](https://getseq.net) is an excellent match for the structured logging in .NET Core: for an example, see [the _dotnetconf_ deep dive session](https://channel9.msdn.com/Events/dotnetConf/2016/ASPNET-Core--deep-dive-on-building-a-real-website-with-todays-bits).
 
 ![Screenshot](https://github.com/datalust/seq-extensions-logging/blob/master/asset/screenshot.png?raw=true)
 
-This package makes it a one-liner to configure ASP.NET Core logging (_Microsoft.Extensions.Logging_) to write structured log events to [Seq](https://getseq.net).
+This package makes it a one-liner to configure ASP.NET Core logging (_Microsoft.Extensions.Logging_) to write structured log events to Seq.
 
 ### Getting started
 
