@@ -13,19 +13,19 @@ This package makes it a one-liner to configure ASP.NET Core logging with Seq.
 Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to the `dependencies` section of your `project.json` file:
 
 ```json
-  "dependencies": {
-    "Seq.Extensions.Logging": "1.0.0-*"
-  }
+    "dependencies": {
+        "Seq.Extensions.Logging": "1.0.0-*"
+    }
 ```
 
 In your `Startup` class's `Configure()` method, call `AddSeq()` on the provided `loggerFactory`.
 
 ```csharp
-  public void Configure(IApplicationBuilder app,
+    public void Configure(IApplicationBuilder app,
                         IHostingEnvironment env,
                         ILoggerFactory loggerFactory)
-  {
-      loggerFactory.AddSeq("http://localhost:5341");
+    {
+        loggerFactory.AddSeq("http://localhost:5341");
 ```
 
 The framework will inject `ILogger` instances into controllers and other classes:
