@@ -85,7 +85,7 @@ namespace Microsoft.Extensions.Logging
                 .Enrich.FromLogContext()
                 .WriteTo.Seq(serverUrl, apiKey: apiKey, controlLevelSwitch: levelSwitch);
 
-            foreach (var levelOverride in levelOverrides)
+            foreach (var levelOverride in levelOverrides ?? new Dictionary<string, LogLevel>())
             {
                 configuration.MinimumLevel.Override(levelOverride.Key, Conversions.MicrosoftToSerilogLevel(levelOverride.Value));
             }
