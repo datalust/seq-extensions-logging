@@ -38,57 +38,14 @@ namespace Serilog.Configuration
         }
 
         /// <summary>
-        /// Specifies one or more enrichers that may add properties dynamically to
-        /// log events.
-        /// </summary>
-        /// <param name="enrichers">Enrichers to apply to all events passing through
-        /// the logger.</param>
-        /// <returns>Configuration object allowing method chaining.</returns>
-        public LoggerConfiguration With(params ILogEventEnricher[] enrichers)
-        {
-            if (enrichers == null) throw new ArgumentNullException(nameof(enrichers));
-            foreach (var logEventEnricher in enrichers)
-            {
-                if (logEventEnricher == null)
-                    throw new ArgumentException("Null enricher is not allowed.");
-                _addEnricher(logEventEnricher);
-            }
-            return _loggerConfiguration;
-        }
-
-        /// <summary>
-        /// Specifies an enricher that may add properties dynamically to
-        /// log events.
-        /// </summary>
-        /// <typeparam name="TEnricher">Enricher type to apply to all events passing through
-        /// the logger.</typeparam>
-        /// <returns>Configuration object allowing method chaining.</returns>
-        public LoggerConfiguration With<TEnricher>()
-            where TEnricher : ILogEventEnricher, new()
-        {
-            return With(new TEnricher());
-        }
-
-        /// <summary>
-        /// Include the specified property value in all events logged to the logger.
-        /// </summary>
-        /// <param name="name">The name of the property to add.</param>
-        /// <param name="value">The property value to add.</param>
-        /// <param name="destructureObjects">If true, objects of unknown type will be logged as structures; otherwise they will be converted using <see cref="Object.ToString"/>.</param>
-        /// <returns>Configuration object allowing method chaining.</returns>
-        public LoggerConfiguration WithProperty(string name, object value, bool destructureObjects = false)
-        {
-            return With(new PropertyEnricher(name, value, destructureObjects));
-        }
-
-        /// <summary>
         /// Enrich log events with properties from <see cref="Context.LogContext"/>.
         /// </summary>
         /// <returns>Configuration object allowing method chaining.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public LoggerConfiguration FromLogContext()
         {
-            return With<LogContextEnricher>();
+            _addEnricher(new LogContextEnricher());
+            return _loggerConfiguration;
         }
     }
 }
