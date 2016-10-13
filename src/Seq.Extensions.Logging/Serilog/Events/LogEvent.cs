@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,7 +34,7 @@ namespace Serilog.Events
         /// <param name="exception">An exception associated with the event, or null.</param>
         /// <param name="messageTemplate">The message template describing the event.</param>
         /// <param name="properties">Properties associated with the event, including those presented in <paramref name="messageTemplate"/>.</param>
-        public LogEvent(DateTimeOffset timestamp, LogEventLevel level, Exception exception, MessageTemplate messageTemplate, IEnumerable<LogEventProperty> properties)
+        public LogEvent(DateTimeOffset timestamp, LogLevel level, Exception exception, MessageTemplate messageTemplate, IEnumerable<LogEventProperty> properties)
         {
             if (messageTemplate == null) throw new ArgumentNullException(nameof(messageTemplate));
             if (properties == null) throw new ArgumentNullException(nameof(properties));
@@ -54,7 +55,7 @@ namespace Serilog.Events
         /// <summary>
         /// The level of the event.
         /// </summary>
-        public LogEventLevel Level { get; }
+        public LogLevel Level { get; }
 
         /// <summary>
         /// The message template describing the event.

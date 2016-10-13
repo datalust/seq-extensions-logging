@@ -122,24 +122,24 @@ namespace Serilog.Extensions.Logging
             return sobj;
         }
 
-        static LogEventLevel ConvertLevel(LogLevel logLevel)
+        static LogLevel ConvertLevel(LogLevel logLevel)
         {
             switch (logLevel)
             {
                 case LogLevel.Critical:
-                    return LogEventLevel.Fatal;
+                    return LogLevel.Critical;
                 case LogLevel.Error:
-                    return LogEventLevel.Error;
+                    return LogLevel.Error;
                 case LogLevel.Warning:
-                    return LogEventLevel.Warning;
+                    return LogLevel.Warning;
                 case LogLevel.Information:
-                    return LogEventLevel.Information;
+                    return LogLevel.Information;
                 case LogLevel.Debug:
-                    return LogEventLevel.Debug;
+                    return LogLevel.Debug;
                 // ReSharper disable once RedundantCaseLabel
                 case LogLevel.Trace:
                 default:
-                    return LogEventLevel.Verbose;
+                    return LogLevel.Trace;
             }
         }
 

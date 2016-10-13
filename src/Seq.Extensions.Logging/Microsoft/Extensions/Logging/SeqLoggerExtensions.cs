@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Seq.Extensions.Logging.Seq.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Seq.Extensions.Logging;
@@ -80,7 +79,7 @@ namespace Microsoft.Extensions.Logging
             LogLevel minimumLevel = LogLevel.Information,
             IDictionary<string, LogLevel> levelOverrides = null)
         {
-            var levelSwitch = new LoggingLevelSwitch(Conversions.MicrosoftToSerilogLevel(minimumLevel));
+            var levelSwitch = new LoggingLevelSwitch(minimumLevel);
 
             var sink = new SeqSink(
                     serverUrl,
@@ -98,7 +97,7 @@ namespace Microsoft.Extensions.Logging
 
             foreach (var levelOverride in levelOverrides ?? new Dictionary<string, LogLevel>())
             {
-                configuration.MinimumLevel.Override(levelOverride.Key, Conversions.MicrosoftToSerilogLevel(levelOverride.Value));
+                configuration.MinimumLevel.Override(levelOverride.Key, levelOverride.Value);
             }
 
             var logger = configuration.CreateLogger();

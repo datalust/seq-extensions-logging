@@ -38,28 +38,7 @@ namespace Tests.Serilog.Extensions
 
         private void SetMinLevel(LoggerConfiguration serilog, LogLevel logLevel)
         {
-            serilog.MinimumLevel.Is(MapLevel(logLevel));
-        }
-
-        private LogEventLevel MapLevel(LogLevel logLevel)
-        {
-            switch (logLevel)
-            {
-                case LogLevel.Trace:
-                    return LogEventLevel.Verbose;
-                case LogLevel.Debug:
-                    return LogEventLevel.Debug;
-                case LogLevel.Information:
-                    return LogEventLevel.Information;
-                case LogLevel.Warning:
-                    return LogEventLevel.Warning;
-                case LogLevel.Error:
-                    return LogEventLevel.Error;
-                case LogLevel.Critical:
-                    return LogEventLevel.Fatal;
-                default:
-                    return LogEventLevel.Verbose;
-            }
+            serilog.MinimumLevel.Is(logLevel);
         }
 
         [Fact]
@@ -89,12 +68,12 @@ namespace Tests.Serilog.Extensions
             logger.Log(LogLevel.Critical, 0, TestMessage, null, null);
 
             Assert.Equal(6, sink.Writes.Count);
-            Assert.Equal(LogEventLevel.Verbose, sink.Writes[0].Level);
-            Assert.Equal(LogEventLevel.Debug, sink.Writes[1].Level);
-            Assert.Equal(LogEventLevel.Information, sink.Writes[2].Level);
-            Assert.Equal(LogEventLevel.Warning, sink.Writes[3].Level);
-            Assert.Equal(LogEventLevel.Error, sink.Writes[4].Level);
-            Assert.Equal(LogEventLevel.Fatal, sink.Writes[5].Level);
+            Assert.Equal(LogLevel.Trace, sink.Writes[0].Level);
+            Assert.Equal(LogLevel.Debug, sink.Writes[1].Level);
+            Assert.Equal(LogLevel.Information, sink.Writes[2].Level);
+            Assert.Equal(LogLevel.Warning, sink.Writes[3].Level);
+            Assert.Equal(LogLevel.Error, sink.Writes[4].Level);
+            Assert.Equal(LogLevel.Critical, sink.Writes[5].Level);
         }
 
         [Theory]

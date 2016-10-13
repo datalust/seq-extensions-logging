@@ -21,6 +21,7 @@ using Serilog.Core.Enrichers;
 using Serilog.Core.Sinks;
 using Serilog.Events;
 using Serilog.Parameters;
+using Microsoft.Extensions.Logging;
 
 namespace Serilog
 {
@@ -32,7 +33,7 @@ namespace Serilog
         readonly List<ILogEventSink> _logEventSinks = new List<ILogEventSink>();
         readonly List<ILogEventEnricher> _enrichers = new List<ILogEventEnricher>();
         readonly Dictionary<string, LoggingLevelSwitch> _overrides = new Dictionary<string, LoggingLevelSwitch>();
-        LogEventLevel _minimumLevel = LogEventLevel.Information;
+        LogLevel _minimumLevel = LogLevel.Information;
         LoggingLevelSwitch _levelSwitch;
         int _maximumDestructuringDepth = 10;
         int _maximumStringLength = int.MaxValue;
@@ -53,8 +54,7 @@ namespace Serilog
         
         /// <summary>
         /// Configures the minimum level at which events will be passed to sinks. If
-        /// not specified, only events at the <see cref="LogEventLevel.Information"/>
-        /// level and above will be passed through.
+        /// not specified, only events at the Information level and above will be passed through.
         /// </summary>
         /// <returns>Configuration object allowing method chaining.</returns>
         public LoggerMinimumLevelConfiguration MinimumLevel

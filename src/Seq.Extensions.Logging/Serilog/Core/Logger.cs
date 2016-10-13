@@ -18,6 +18,7 @@ using Serilog.Core.Enrichers;
 using Seq.Extensions.Logging;
 using Serilog.Events;
 using Serilog.Parameters;
+using Microsoft.Extensions.Logging;
 
 #pragma warning disable Serilog004 // Constant MessageTemplate verifier
 
@@ -42,13 +43,13 @@ namespace Serilog.Core
         // we keep a separate field from the switch, which may
         // not be specified. If it is, we'll set _minimumLevel
         // to its lower limit and fall through to the secondary check.
-        readonly LogEventLevel _minimumLevel;
+        readonly LogLevel _minimumLevel;
         readonly LoggingLevelSwitch _levelSwitch;
         readonly LevelOverrideMap _overrideMap;
 
         internal Logger(
             MessageTemplateProcessor messageTemplateProcessor,
-            LogEventLevel minimumLevel,
+            LogLevel minimumLevel,
             ILogEventSink sink,
             ILogEventEnricher enricher,
             Action dispose = null,
@@ -72,7 +73,7 @@ namespace Serilog.Core
         // throwing from here breaks the logger's no-throw contract, and callers are all in this file anyway.
         Logger(
             MessageTemplateProcessor messageTemplateProcessor,
-            LogEventLevel minimumLevel,
+            LogLevel minimumLevel,
             ILogEventSink sink,
             ILogEventEnricher enricher,
             Action dispose = null,
@@ -193,7 +194,7 @@ namespace Serilog.Core
         /// </summary>
         /// <param name="level">Level to check.</param>
         /// <returns>True if the level is enabled; otherwise, false.</returns>
-        public bool IsEnabled(LogEventLevel level)
+        public bool IsEnabled(LogLevel level)
         {
             if ((int) level < (int) _minimumLevel)
                 return false;

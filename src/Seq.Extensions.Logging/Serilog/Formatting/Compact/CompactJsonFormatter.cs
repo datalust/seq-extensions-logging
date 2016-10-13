@@ -18,6 +18,7 @@ using System.Linq;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 using Serilog.Parsing;
+using Microsoft.Extensions.Logging;
 
 namespace Serilog.Formatting.Compact
 {
@@ -84,7 +85,7 @@ namespace Serilog.Formatting.Compact
                 output.Write(']');
             }
 
-            if (logEvent.Level != LogEventLevel.Information)
+            if (logEvent.Level != LogLevel.Information)
             {
                 output.Write(",\"@l\":\"");
                 output.Write(logEvent.Level);

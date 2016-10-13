@@ -14,6 +14,7 @@
 
 using System;
 using Serilog.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Serilog.Sinks.Seq
 {
@@ -30,12 +31,12 @@ namespace Serilog.Sinks.Seq
         // we'll reevaluate.
         const string LevelMarker = "\"MinimumLevelAccepted\":\"";
 
-        public static LogEventLevel? ReadEventInputResult(string eventInputResult)
+        public static LogLevel? ReadEventInputResult(string eventInputResult)
         {
             if (eventInputResult == null) return null;
 
             // Seq 1.5 servers will return JSON including "MinimumLevelAccepted":x, where
-            // x may be null or a JSON string representation of the equivalent LogEventLevel
+            // x may be null or a JSON string representation of the equivalent LogLevel
             var startProp = eventInputResult.IndexOf(LevelMarker, StringComparison.Ordinal);
             if (startProp == -1)
                 return null;
@@ -49,8 +50,12 @@ namespace Serilog.Sinks.Seq
                 return null;
 
             var value = eventInputResult.Substring(startValue, endValue - startValue);
-            LogEventLevel minimumLevel;
-            if (!Enum.TryParse(value, out minimumLevel))
+            LogLevel minimumLevel;
+            if (value == "Verbose")
+                minimumLevel = LogLevel.Trace;
+            else if (value == "Fatal")
+                minimumLevel = LogLevel.Critical;
+            else if (!Enum.TryParse(value, out minimumLevel))
                 return null;
 
             return minimumLevel;

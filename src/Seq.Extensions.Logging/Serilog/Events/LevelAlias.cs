@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
+
 namespace Serilog.Events
 {
     /// <summary>
-    /// Descriptive aliases for <see cref="LogEventLevel"/>.
+    /// Descriptive aliases for <see cref="LogLevel"/>.
     /// </summary>
     /// <remarks>These do not appear as members of the enumeration
     /// as duplicated underlying values result in issues when presenting
@@ -25,11 +27,11 @@ namespace Serilog.Events
         /// <summary>
         /// The least significant level of event.
         /// </summary>
-        public const LogEventLevel Minimum = LogEventLevel.Verbose;
+        public const LogLevel Minimum = LogLevel.Trace;
 
         /// <summary>
         /// The most significant level of event.
         /// </summary>
-        public const LogEventLevel Maximum = LogEventLevel.Fatal;
+        public const LogLevel Maximum = LogLevel.Critical;
     }
 }

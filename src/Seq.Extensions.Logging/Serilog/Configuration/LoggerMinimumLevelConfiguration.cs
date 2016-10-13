@@ -14,7 +14,7 @@
 
 using System;
 using Serilog.Core;
-using Serilog.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Serilog.Configuration
 {
@@ -24,11 +24,11 @@ namespace Serilog.Configuration
     class LoggerMinimumLevelConfiguration
     {
         readonly LoggerConfiguration _loggerConfiguration;
-        readonly Action<LogEventLevel> _setMinimum;
+        readonly Action<LogLevel> _setMinimum;
         readonly Action<LoggingLevelSwitch> _setLevelSwitch;
         readonly Action<string, LoggingLevelSwitch> _addOverride;
 
-        internal LoggerMinimumLevelConfiguration(LoggerConfiguration loggerConfiguration, Action<LogEventLevel> setMinimum, 
+        internal LoggerMinimumLevelConfiguration(LoggerConfiguration loggerConfiguration, Action<LogLevel> setMinimum, 
                                                  Action<LoggingLevelSwitch> setLevelSwitch, Action<string, LoggingLevelSwitch> addOverride)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -45,7 +45,7 @@ namespace Serilog.Configuration
         /// </summary>
         /// <param name="minimumLevel">The minimum level to set.</param>
         /// <returns>Configuration object allowing method chaining.</returns>
-        public LoggerConfiguration Is(LogEventLevel minimumLevel)
+        public LoggerConfiguration Is(LogLevel minimumLevel)
         {
             _setMinimum(minimumLevel);
             return _loggerConfiguration;
@@ -89,7 +89,7 @@ namespace Serilog.Configuration
         /// <param name="source">The (partial) namespace or type name to set the override for.</param>
         /// <param name="minimumLevel">The minimum level applied to loggers for matching sources.</param>
         /// <returns>Configuration object allowing method chaining.</returns>
-        public LoggerConfiguration Override(string source, LogEventLevel minimumLevel)
+        public LoggerConfiguration Override(string source, LogLevel minimumLevel)
         {
             return Override(source, new LoggingLevelSwitch(minimumLevel));
         }

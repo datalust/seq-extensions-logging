@@ -18,6 +18,7 @@ using Serilog.Core;
 using Serilog.Core.Sinks;
 using Seq.Extensions.Logging;
 using Serilog.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Serilog.Configuration
 {
@@ -53,7 +54,7 @@ namespace Serilog.Configuration
         [EditorBrowsable(EditorBrowsableState.Never)]
         public LoggerConfiguration Sink(
             ILogEventSink logEventSink,
-            LogEventLevel restrictedToMinimumLevel)
+            LogLevel restrictedToMinimumLevel)
         {
             return Sink(logEventSink, restrictedToMinimumLevel, null);
         }
@@ -69,7 +70,7 @@ namespace Serilog.Configuration
         /// <returns>Configuration object allowing method chaining.</returns>
         public LoggerConfiguration Sink(
             ILogEventSink logEventSink,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LogLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             // ReSharper disable once MethodOverloadWithOptionalParameter
             LoggingLevelSwitch levelSwitch = null)
         {
@@ -100,7 +101,7 @@ namespace Serilog.Configuration
         /// to be changed at runtime.</param>
         /// <returns>Configuration object allowing method chaining.</returns>
         public LoggerConfiguration Sink<TSink>(
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LogLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch levelSwitch = null)
             where TSink : ILogEventSink, new()
         {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Serilog.Core
 {
@@ -21,14 +21,14 @@ namespace Serilog.Core
     /// </summary>
     class LoggingLevelSwitch
     {
-        volatile LogEventLevel _minimumLevel;
+        volatile LogLevel _minimumLevel;
 
         /// <summary>
         /// Create a <see cref="LoggingLevelSwitch"/> at the initial
         /// minimum level.
         /// </summary>
         /// <param name="initialMinimumLevel">The initial level to which the switch is set.</param>
-        public LoggingLevelSwitch(LogEventLevel initialMinimumLevel = LogEventLevel.Information)
+        public LoggingLevelSwitch(LogLevel initialMinimumLevel = LogLevel.Information)
         {
             _minimumLevel = initialMinimumLevel;
         }
@@ -39,7 +39,7 @@ namespace Serilog.Core
         /// </summary>
         // Reading this property generates a memory barrier,
         // so needs to be used judiciously in the logging pipeline.
-        public LogEventLevel MinimumLevel
+        public LogLevel MinimumLevel
         {
             get { return _minimumLevel; }
             set { _minimumLevel = value; }
