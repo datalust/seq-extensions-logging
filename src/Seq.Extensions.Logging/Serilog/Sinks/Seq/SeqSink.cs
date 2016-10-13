@@ -21,7 +21,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Seq.Extensions.Logging;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Json;
@@ -40,7 +39,6 @@ namespace Serilog.Sinks.Seq
         // If non-null, then background level checks will be performed; set either through the constructor
         // or in response to a level specification from the server. Never set to null after being made non-null.
         LoggingLevelSwitch _levelControlSwitch;
-        readonly bool _useCompactFormat;
         static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
         DateTime _nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
 
@@ -54,15 +52,13 @@ namespace Serilog.Sinks.Seq
             TimeSpan period,
             long? eventBodyLimitBytes,
             LoggingLevelSwitch levelControlSwitch,
-            HttpMessageHandler messageHandler,
-            bool useCompactFormat)
+            HttpMessageHandler messageHandler)
             : base(batchPostingLimit, period)
         {
             if (serverUrl == null) throw new ArgumentNullException(nameof(serverUrl));
             _apiKey = apiKey;
             _eventBodyLimitBytes = eventBodyLimitBytes;
             _levelControlSwitch = levelControlSwitch;
-            _useCompactFormat = useCompactFormat;
             _httpClient = messageHandler != null ? new HttpClient(messageHandler) : new HttpClient();
             _httpClient.BaseAddress = new Uri(SeqApi.NormalizeServerBaseAddress(serverUrl));
         }
@@ -90,25 +86,15 @@ namespace Serilog.Sinks.Seq
         {
             _nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
 
-            string payload, payloadContentType;
-            if (_useCompactFormat)
-            {
-                payloadContentType = SeqApi.CompactLogEventFormatMimeType;
-                payload = FormatCompactPayload(events, _eventBodyLimitBytes);
-            }
-            else
-            {
-                payloadContentType = SeqApi.RawEventFormatMimeType;
-                payload = FormatRawPayload(events, _eventBodyLimitBytes);
-            }
+            var payload = FormatCompactPayload(events, _eventBodyLimitBytes);
 
-            var content = new StringContent(payload, Encoding.UTF8, payloadContentType);
+            var content = new StringContent(payload, Encoding.UTF8, SeqApi.CompactLogEventFormatMimeType);
             if (!string.IsNullOrWhiteSpace(_apiKey))
                 content.Headers.Add(SeqApi.ApiKeyHeaderName, _apiKey);
     
             var result = await _httpClient.PostAsync(SeqApi.BulkUploadResource, content).ConfigureAwait(false);
             if (!result.IsSuccessStatusCode)
-                throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to Seq");
+                throw new Exception($"Received failed result {result.StatusCode} when posting events to Seq");
 
             var returned = await result.Content.ReadAsStringAsync();
             var minimumAcceptedLevel = SeqApi.ReadEventInputResult(returned);
@@ -151,39 +137,6 @@ namespace Serilog.Sinks.Seq
                 }
             }
 
-            return payload.ToString();
-        }
-
-        internal static string FormatRawPayload(IEnumerable<LogEvent> events, long? eventBodyLimitBytes)
-        {
-            var payload = new StringWriter();
-            payload.Write("{\"Events\":[");
-
-            var delimStart = "";
-            foreach (var logEvent in events)
-            {
-                var buffer = new StringWriter();
-
-                try
-                {
-                    RawJsonFormatter.FormatContent(logEvent, buffer);
-                }
-                catch (Exception ex)
-                {
-                    LogNonFormattableEvent(logEvent, ex);
-                    continue;
-                }
-
-                var json = buffer.ToString();
-                if (CheckEventBodySize(json, eventBodyLimitBytes))
-                {
-                    payload.Write(delimStart);
-                    payload.Write(json);
-                    delimStart = ",";
-                }
-            }
-
-            payload.Write("]}");
             return payload.ToString();
         }
 

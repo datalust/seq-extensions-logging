@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Serilog.Core;
 using Serilog.Events;
 
 namespace Serilog.Parsing
@@ -24,7 +23,7 @@ namespace Serilog.Parsing
     /// Parses message template strings into sequences of text or property
     /// tokens.
     /// </summary>
-    class MessageTemplateParser : IMessageTemplateParser
+    class MessageTemplateParser
     {
         /// <summary>
         /// Parse the supplied message template.

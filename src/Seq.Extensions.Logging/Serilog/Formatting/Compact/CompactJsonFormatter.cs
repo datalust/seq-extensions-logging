@@ -21,10 +21,7 @@ using Serilog.Parsing;
 
 namespace Serilog.Formatting.Compact
 {
-    /// <summary>
-    /// An <see cref="ITextFormatter"/> that writes events in a compact JSON format.
-    /// </summary>
-    class CompactJsonFormatter: ITextFormatter
+    class CompactJsonFormatter
     {
         readonly JsonValueFormatter _valueFormatter;
 

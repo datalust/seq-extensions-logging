@@ -15,19 +15,20 @@
 using System;
 using System.Collections.Generic;
 using Serilog.Events;
+using Serilog.Parsing;
 
 namespace Serilog.Core.Pipeline
 {
-    class MessageTemplateCache : IMessageTemplateParser
+    class MessageTemplateCache
     {
-        readonly IMessageTemplateParser _innerParser;
+        readonly MessageTemplateParser _innerParser;
         readonly Dictionary<string, MessageTemplate> _templates = new Dictionary<string,MessageTemplate>();
         readonly object _templatesLock = new object();
 
         const int MaxCacheItems = 1000;
         const int MaxCachedTemplateLength = 1024;
 
-        public MessageTemplateCache(IMessageTemplateParser innerParser)
+        public MessageTemplateCache(MessageTemplateParser innerParser)
         {
             if (innerParser == null) throw new ArgumentNullException(nameof(innerParser));
             _innerParser = innerParser;

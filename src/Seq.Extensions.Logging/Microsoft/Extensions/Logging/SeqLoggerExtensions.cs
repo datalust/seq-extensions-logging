@@ -89,8 +89,7 @@ namespace Microsoft.Extensions.Logging
                     TimeSpan.FromSeconds(2),
                     256 * 1024,
                     levelSwitch,
-                    null,
-                    true);
+                    null);
 
                 var configuration = new LoggerConfiguration()
                 .MinimumLevel.ControlledBy(levelSwitch)
