@@ -20,7 +20,7 @@ namespace Serilog.Formatting
     /// <summary>
     /// Formats log events in a textual representation.
     /// </summary>
-    public interface ITextFormatter
+    interface ITextFormatter
     {
         /// <summary>
         /// Format the log event into the output.

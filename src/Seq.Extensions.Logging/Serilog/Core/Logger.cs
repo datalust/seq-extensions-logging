@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using Serilog.Core.Enrichers;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
 using Serilog.Events;
 using Serilog.Parameters;
 
@@ -26,9 +26,9 @@ namespace Serilog.Core
     /// <summary>
     /// The core Serilog logging pipeline. A <see cref="Logger"/> must
     /// be disposed to flush any events buffered within it. Most application
-    /// code should depend on <see cref="ILogger"/>, not this class.
+    /// code should depend on <see cref="Logger"/>, not this class.
     /// </summary>
-    public sealed class Logger : ILogger, ILogEventSink, IDisposable
+    sealed class Logger : ILogEventSink, IDisposable
     {
         static readonly object[] NoPropertyValues = new object[0];
 
@@ -93,7 +93,7 @@ namespace Serilog.Core
         /// </summary>
         /// <param name="enricher">Enricher that applies in the context.</param>
         /// <returns>A logger that will enrich log events as specified.</returns>
-        public ILogger ForContext(ILogEventEnricher enricher)
+        public Logger ForContext(ILogEventEnricher enricher)
         {
             if (enricher == null)
                 return this; // No context here, so little point writing to SelfLog.
@@ -113,7 +113,7 @@ namespace Serilog.Core
         /// </summary>
         /// <param name="enrichers">Enrichers that apply in the context.</param>
         /// <returns>A logger that will enrich log events as specified.</returns>
-        public ILogger ForContext(IEnumerable<ILogEventEnricher> enrichers)
+        public Logger ForContext(IEnumerable<ILogEventEnricher> enrichers)
         {
             if (enrichers == null)
                 return this; // No context here, so little point writing to SelfLog.
@@ -129,7 +129,7 @@ namespace Serilog.Core
         /// <param name="destructureObjects">If true, the value will be serialized as a structured
         /// object if possible; if false, the object will be recorded as a scalar or simple array.</param>
         /// <returns>A logger that will enrich log events as specified.</returns>
-        public ILogger ForContext(string propertyName, object value, bool destructureObjects = false)
+        public Logger ForContext(string propertyName, object value, bool destructureObjects = false)
         {
             if (!LogEventProperty.IsValidName(propertyName))
             {
@@ -168,7 +168,7 @@ namespace Serilog.Core
         /// </summary>
         /// <param name="source">Type generating log messages in the context.</param>
         /// <returns>A logger that will enrich log events as specified.</returns>
-        public ILogger ForContext(Type source)
+        public Logger ForContext(Type source)
         {
             if (source == null)
                 return this; // Little point in writing to SelfLog here because we don't have any contextual information
@@ -182,7 +182,7 @@ namespace Serilog.Core
         /// </summary>
         /// <typeparam name="TSource">Type generating log messages in the context.</typeparam>
         /// <returns>A logger that will enrich log events as specified.</returns>
-        public ILogger ForContext<TSource>()
+        public Logger ForContext<TSource>()
         {
             return ForContext(typeof(TSource));
         }
@@ -1308,7 +1308,7 @@ namespace Serilog.Core
 
         /// <summary>
         /// Uses configured scalar conversion and destructuring rules to bind a set of properties to a
-        /// message template. Returns false if the template or values are invalid (<summary>ILogger</summary>
+        /// message template. Returns false if the template or values are invalid (<summary>Logger</summary>
         /// methods never throw exceptions).
         /// </summary>
         /// <param name="messageTemplate">Message template describing an event.</param>
@@ -1344,7 +1344,7 @@ namespace Serilog.Core
         /// Uses configured scalar conversion and destructuring rules to bind a property value to its captured
         /// representation.
         /// </summary>
-        /// <returns>True if the property could be bound, otherwise false (<summary>ILogger</summary>
+        /// <returns>True if the property could be bound, otherwise false (<summary>Logger</summary>
         /// <param name="propertyName">The name of the property. Must be non-empty.</param>
         /// <param name="value">The property value.</param>
         /// <param name="destructureObjects">If true, the value will be serialized as a structured

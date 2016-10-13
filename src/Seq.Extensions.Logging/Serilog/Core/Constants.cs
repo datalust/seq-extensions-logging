@@ -17,7 +17,7 @@ namespace Serilog.Core
     /// <summary>
     /// Constants used in the core logging pipeline and associated types.
     /// </summary>
-    public static class Constants
+    static class Constants
     {
         /// <summary>
         /// The name of the property included in the emitted log events

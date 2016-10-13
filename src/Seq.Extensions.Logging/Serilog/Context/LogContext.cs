@@ -49,7 +49,7 @@ namespace Serilog.Context
     /// </example>
     /// <remarks>The scope of the context is the current logical thread, using AsyncLocal
     /// (and so is preserved across async/await calls).</remarks>
-    public static class LogContext
+    static class LogContext
     {
 #if ASYNCLOCAL
         static readonly AsyncLocal<ImmutableStack<ILogEventEnricher>> Data = new AsyncLocal<ImmutableStack<ILogEventEnricher>>();

@@ -17,7 +17,7 @@ namespace Serilog.Parsing
     /// <summary>
     /// Defines the direction of the alignment.
     /// </summary>
-    public enum AlignmentDirection
+    enum AlignmentDirection
     {
         /// <summary>
         /// Text will be left-aligned.

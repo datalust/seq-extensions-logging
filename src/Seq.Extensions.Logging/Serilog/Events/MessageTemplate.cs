@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
 using Serilog.Parsing;
 
 namespace Serilog.Events
@@ -26,7 +26,7 @@ namespace Serilog.Events
     /// can subsequently render the template in textual form given the list
     /// of properties.
     /// </summary>
-    public class MessageTemplate
+    class MessageTemplate
     {
         readonly MessageTemplateToken[] _tokens;
 

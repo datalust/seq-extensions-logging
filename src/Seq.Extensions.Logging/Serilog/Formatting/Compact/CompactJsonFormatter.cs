@@ -24,7 +24,7 @@ namespace Serilog.Formatting.Compact
     /// <summary>
     /// An <see cref="ITextFormatter"/> that writes events in a compact JSON format.
     /// </summary>
-    public class CompactJsonFormatter: ITextFormatter
+    class CompactJsonFormatter: ITextFormatter
     {
         readonly JsonValueFormatter _valueFormatter;
 

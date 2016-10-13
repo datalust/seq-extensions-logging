@@ -22,7 +22,7 @@ namespace Serilog.Events
     /// <summary>
     /// A value represented as a collection of name-value properties.
     /// </summary>
-    public class StructureValue : LogEventPropertyValue
+    class StructureValue : LogEventPropertyValue
     {
         readonly LogEventProperty[] _properties;
 

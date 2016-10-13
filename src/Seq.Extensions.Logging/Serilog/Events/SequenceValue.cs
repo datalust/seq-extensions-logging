@@ -22,7 +22,7 @@ namespace Serilog.Events
     /// <summary>
     /// A value represented as an ordered sequence of values.
     /// </summary>
-    public class SequenceValue : LogEventPropertyValue
+    class SequenceValue : LogEventPropertyValue
     {
         readonly LogEventPropertyValue[] _elements;
 

@@ -17,7 +17,7 @@ namespace Serilog.Events
     /// <summary>
     /// Specifies the meaning and relative importance of a log event.
     /// </summary>
-    public enum LogEventLevel
+    enum LogEventLevel
     {
         /// <summary>
         /// Anything and everything you might want to know about

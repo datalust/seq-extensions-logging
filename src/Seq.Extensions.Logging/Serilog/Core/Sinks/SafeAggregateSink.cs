@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
 using Serilog.Events;
 
 namespace Serilog.Core.Sinks

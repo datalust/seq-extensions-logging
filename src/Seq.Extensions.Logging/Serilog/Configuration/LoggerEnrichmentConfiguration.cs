@@ -22,7 +22,7 @@ namespace Serilog.Configuration
     /// <summary>
     /// Controls enrichment configuration.
     /// </summary>
-    public class LoggerEnrichmentConfiguration
+    class LoggerEnrichmentConfiguration
     {
         readonly LoggerConfiguration _loggerConfiguration;
         readonly Action<ILogEventEnricher> _addEnricher;

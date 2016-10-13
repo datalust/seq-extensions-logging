@@ -18,7 +18,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Serilog.Core;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
 using Serilog.Events;
 using System.Threading;
 
@@ -34,7 +34,7 @@ namespace Serilog.Sinks.PeriodicBatching
     /// that want to change this behavior need to either implement from scratch, or
     /// embed retry logic in the batch emitting functions.
     /// </remarks>
-    public abstract class PeriodicBatchingSink : ILogEventSink, IDisposable
+    abstract class PeriodicBatchingSink : ILogEventSink, IDisposable
     {
         readonly int _batchSizeLimit;
         readonly BoundedConcurrentQueue<LogEvent> _queue;

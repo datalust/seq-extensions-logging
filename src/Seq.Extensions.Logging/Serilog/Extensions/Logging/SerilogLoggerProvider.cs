@@ -18,31 +18,25 @@ namespace Serilog.Extensions.Logging
     /// <summary>
     /// An <see cref="ILoggerProvider"/> that pipes events through Serilog.
     /// </summary>
-    public class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher
+    class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher
     {
         internal const string OriginalFormatPropertyName = "{OriginalFormat}";
 
         // May be null; if it is, Log.Logger will be lazily used
-        readonly ILogger _logger;
+        readonly Logger _logger;
         readonly Action _dispose;
 
         /// <summary>
         /// Construct a <see cref="SerilogLoggerProvider"/>.
         /// </summary>
-        /// <param name="logger">A Serilog logger to pipe events through; if null, the static <see cref="Log"/> class will be used.</param>
-        /// <param name="dispose">If true, the provided logger or static log class will be disposed/closed when the provider is disposed.</param>
-        public SerilogLoggerProvider(ILogger logger = null, bool dispose = false)
+        /// <param name="logger">A Serilog logger to pipe events through.</param>
+        public SerilogLoggerProvider(Logger logger)
         {
-            if (logger != null)
-                _logger = logger.ForContext(new[] { this });
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
 
-            if (dispose)
-            {
-                if (logger != null)
-                    _dispose = () => (logger as IDisposable)?.Dispose();
-                else
-                    _dispose = Log.CloseAndFlush;
-            }
+            _logger = logger.ForContext(new[] { this });
+            _dispose = () => (logger as IDisposable)?.Dispose();
         }
 
         /// <inheritdoc />

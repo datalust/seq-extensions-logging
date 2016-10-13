@@ -19,7 +19,7 @@ namespace Serilog.Core
     /// <summary>
     /// Applied during logging to add additional information to log events.
     /// </summary>
-    public interface ILogEventEnricher
+    interface ILogEventEnricher
     {
         /// <summary>
         /// Enrich the log event.

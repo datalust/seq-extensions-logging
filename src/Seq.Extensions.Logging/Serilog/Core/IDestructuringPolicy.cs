@@ -20,7 +20,7 @@ namespace Serilog.Core
     /// Determine how, when destructuring, a supplied value is represented
     /// as a complex log event property.
     /// </summary>
-    public interface IDestructuringPolicy
+    interface IDestructuringPolicy
     {
         /// <summary>
         /// If supported, destructure the provided value.

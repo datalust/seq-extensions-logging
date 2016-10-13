@@ -21,7 +21,7 @@ namespace Serilog.Events
     /// <summary>
     /// A log event.
     /// </summary>
-    public class LogEvent
+    class LogEvent
     {
         readonly Dictionary<string, LogEventPropertyValue> _properties;
 

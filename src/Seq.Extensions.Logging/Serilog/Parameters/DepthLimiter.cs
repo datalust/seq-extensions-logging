@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Serilog.Core;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
 using Serilog.Events;
 using Serilog.Parsing;
 

@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Seq.Extensions.Logging.Seq.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
+using Serilog.Extensions.Logging;
+using Serilog.Sinks.Seq;
 
 namespace Microsoft.Extensions.Logging
 {
@@ -80,10 +82,20 @@ namespace Microsoft.Extensions.Logging
         {
             var levelSwitch = new LoggingLevelSwitch(Conversions.MicrosoftToSerilogLevel(minimumLevel));
 
-            var configuration = new LoggerConfiguration()
+            var sink = new SeqSink(
+                    serverUrl,
+                    apiKey,
+                    1000,
+                    TimeSpan.FromSeconds(2),
+                    256 * 1024,
+                    levelSwitch,
+                    null,
+                    true);
+
+                var configuration = new LoggerConfiguration()
                 .MinimumLevel.ControlledBy(levelSwitch)
                 .Enrich.FromLogContext()
-                .WriteTo.Seq(serverUrl, apiKey: apiKey, controlLevelSwitch: levelSwitch);
+                .WriteTo.Sink(sink);
 
             foreach (var levelOverride in levelOverrides ?? new Dictionary<string, LogLevel>())
             {
@@ -91,7 +103,9 @@ namespace Microsoft.Extensions.Logging
             }
 
             var logger = configuration.CreateLogger();
-            return loggerFactory.AddSerilog(logger, dispose: true);
+            loggerFactory.AddProvider(new SerilogLoggerProvider(logger));
+
+            return loggerFactory;
         }
     }
 }

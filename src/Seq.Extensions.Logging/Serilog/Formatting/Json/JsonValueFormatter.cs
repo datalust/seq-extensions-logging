@@ -23,14 +23,14 @@ namespace Serilog.Formatting.Json
     /// <summary>
     /// Converts Serilog's structured property value format into JSON.
     /// </summary>
-    public class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
+    class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
     {
         readonly string _typeTagName;
 
         const string DefaultTypeTagName = "_typeTag";
 
         /// <summary>
-        /// Construct a <see cref="JsonFormatter"/>.
+        /// Construct a <see cref="JsonValueFormatter"/>.
         /// </summary>
         /// <param name="typeTagName">When serializing structured (object) values,
         /// the property name to use for the Serilog <see cref="StructureValue.TypeTag"/> field

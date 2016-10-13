@@ -21,7 +21,7 @@ namespace Serilog.Configuration
     /// <summary>
     /// Controls sink configuration.
     /// </summary>
-    public class LoggerMinimumLevelConfiguration
+    class LoggerMinimumLevelConfiguration
     {
         readonly LoggerConfiguration _loggerConfiguration;
         readonly Action<LogEventLevel> _setMinimum;

@@ -22,7 +22,7 @@ namespace Serilog.Parsing
     /// <summary>
     /// A message template token representing literal text.
     /// </summary>
-    public class TextToken : MessageTemplateToken
+    class TextToken : MessageTemplateToken
     {
         /// <summary>
         /// Construct a <see cref="TextToken"/>.

@@ -20,6 +20,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog.Core;
+using Seq.Extensions.Logging;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting.Compact;

@@ -20,7 +20,7 @@ namespace Serilog.Core
     /// Creates log event properties from regular .NET objects, applying policies as
     /// required.
     /// </summary>
-    public interface ILogEventPropertyFactory
+    interface ILogEventPropertyFactory
     {
         /// <summary>
         /// Construct a <see cref="LogEventProperty"/> with the specified name and value.

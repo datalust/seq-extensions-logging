@@ -19,7 +19,7 @@ namespace Serilog.Core
     /// <summary>
     /// A destination for log events.
     /// </summary>
-    public interface ILogEventSink
+    interface ILogEventSink
     {
         /// <summary>
         /// Emit the provided log event to the sink.

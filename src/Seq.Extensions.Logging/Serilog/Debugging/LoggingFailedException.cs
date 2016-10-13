@@ -20,7 +20,7 @@ namespace Serilog.Debugging
     /// May be thrown by log event sinks when a failure occurs. Should not be used in cases
     /// where the exception would propagate out to callers.
     /// </summary>
-    public class LoggingFailedException : Exception
+    class LoggingFailedException : Exception
     {
         /// <summary>
         /// Construct a <see cref="LoggingFailedException"/> to communicate a logging failure.

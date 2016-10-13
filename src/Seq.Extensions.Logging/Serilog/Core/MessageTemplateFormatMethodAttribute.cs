@@ -21,7 +21,7 @@ namespace Serilog.Core
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method)]
-    public sealed class MessageTemplateFormatMethodAttribute : Attribute
+    sealed class MessageTemplateFormatMethodAttribute : Attribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageTemplateFormatMethodAttribute"/> class.

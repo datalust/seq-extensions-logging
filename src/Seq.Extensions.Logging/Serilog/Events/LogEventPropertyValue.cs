@@ -21,7 +21,7 @@ namespace Serilog.Events
     /// The value associated with a <see cref="LogEventProperty"/>. Divided into scalar,
     /// sequence and structure values to direct serialization into various formats.
     /// </summary>
-    public abstract class LogEventPropertyValue : IFormattable
+    abstract class LogEventPropertyValue : IFormattable
     {
         /// <summary>
         /// Render the value to the output.

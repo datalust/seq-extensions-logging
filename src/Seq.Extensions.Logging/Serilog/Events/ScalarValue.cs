@@ -21,7 +21,7 @@ namespace Serilog.Events
     /// <summary>
     /// A property value corresponding to a simple, scalar type.
     /// </summary>
-    public class ScalarValue : LogEventPropertyValue
+    class ScalarValue : LogEventPropertyValue
     {
         /// <summary>
         /// Construct a <see cref="ScalarValue"/> with the specified

@@ -24,7 +24,7 @@ namespace Serilog.Parsing
     /// Parses message template strings into sequences of text or property
     /// tokens.
     /// </summary>
-    public class MessageTemplateParser : IMessageTemplateParser
+    class MessageTemplateParser : IMessageTemplateParser
     {
         /// <summary>
         /// Parse the supplied message template.

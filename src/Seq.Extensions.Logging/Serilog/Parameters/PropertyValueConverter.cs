@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Serilog.Core;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
 using Serilog.Events;
 using Serilog.Parsing;
 using Serilog.Policies;
@@ -51,35 +51,28 @@ namespace Serilog.Parameters
 
         public PropertyValueConverter(
             int maximumDestructuringDepth, 
-            int maximumStringLength,
-            IEnumerable<Type> additionalScalarTypes,
-            IEnumerable<IDestructuringPolicy> additionalDestructuringPolicies,
-            bool propagateExceptions)
+            int maximumStringLength)
         {
-            if (additionalScalarTypes == null) throw new ArgumentNullException(nameof(additionalScalarTypes));
-            if (additionalDestructuringPolicies == null) throw new ArgumentNullException(nameof(additionalDestructuringPolicies));
             if (maximumDestructuringDepth < 0) throw new ArgumentOutOfRangeException(nameof(maximumDestructuringDepth));
             if (maximumStringLength < 2) throw new ArgumentOutOfRangeException(nameof(maximumDestructuringDepth));
 
             _maximumDestructuringDepth = maximumDestructuringDepth;
-            _propagateExceptions = propagateExceptions;
+            _propagateExceptions = false;
             _maximumStringLength = maximumStringLength;
 
             _scalarConversionPolicies = new IScalarConversionPolicy[]
             {
-                new SimpleScalarConversionPolicy(BuiltInScalarTypes.Concat(additionalScalarTypes)),
+                new SimpleScalarConversionPolicy(BuiltInScalarTypes),
                 new NullableScalarConversionPolicy(),
                 new EnumScalarConversionPolicy(),
                 new ByteArrayScalarConversionPolicy(),
             };
 
-            _destructuringPolicies = additionalDestructuringPolicies
-                .Concat(new IDestructuringPolicy []
+            _destructuringPolicies = new IDestructuringPolicy []
                 {
                     new DelegateDestructuringPolicy(),
                     new ReflectionTypesScalarDestructuringPolicy()
-                })
-                .ToArray();
+                };
         }
 
         public LogEventProperty CreateProperty(string name, object value, bool destructureObjects = false)

@@ -24,7 +24,7 @@ namespace Serilog.Data
     /// one type into scalar properties of another.
     /// </summary>
     /// <typeparam name="TState"></typeparam>
-    public abstract class LogEventPropertyValueRewriter<TState> : LogEventPropertyValueVisitor<TState, LogEventPropertyValue>
+    abstract class LogEventPropertyValueRewriter<TState> : LogEventPropertyValueVisitor<TState, LogEventPropertyValue>
     {
         /// <summary>
         /// Visit a <see cref="ScalarValue"/> value.

@@ -6,7 +6,7 @@ namespace Serilog.Core
     /// Supports the policy-driven construction of <see cref="LogEventPropertyValue"/>s given
     /// regular .NET objects.
     /// </summary>
-    public interface ILogEventPropertyValueFactory
+    interface ILogEventPropertyValueFactory
     {
         /// <summary>
         /// Create a <see cref="LogEventPropertyValue"/> given a .NET object and destructuring

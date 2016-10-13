@@ -15,13 +15,13 @@ namespace Serilog.Extensions.Logging
     class SerilogLogger : FrameworkLogger
     {
         readonly SerilogLoggerProvider _provider;
-        readonly ILogger _logger;
+        readonly Logger _logger;
 
         static readonly MessageTemplateParser _messageTemplateParser = new MessageTemplateParser();
 
         public SerilogLogger(
             SerilogLoggerProvider provider,
-            ILogger logger = null,
+            Logger logger = null,
             string name = null)
         {
             if (provider == null) throw new ArgumentNullException(nameof(provider));
@@ -29,7 +29,7 @@ namespace Serilog.Extensions.Logging
             _logger = logger;
 
             // If a logger was passed, the provider has already added itself as an enricher
-            _logger = _logger ?? Serilog.Log.Logger.ForContext(new[] { provider });
+            _logger = _logger.ForContext(new[] { provider });
 
             if (name != null)
             {
