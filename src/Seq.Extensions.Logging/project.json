@@ -57,6 +57,7 @@
 
   "buildOptions": {
     "warningsAsErrors": true,
-    "xmlDoc": true
+    "xmlDoc": true,
+    "keyFile": "../../asset/seqext.snk"
   }
 }
