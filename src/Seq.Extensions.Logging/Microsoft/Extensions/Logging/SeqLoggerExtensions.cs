@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Seq.Extensions.Logging.Seq.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
-using Serilog.Debugging;
+using Seq.Extensions.Logging;
+using Serilog.Extensions.Logging;
+using Serilog.Sinks.Seq;
+using Serilog.Enrichers;
+using Serilog.Parameters;
+using Serilog.Events;
 
 namespace Microsoft.Extensions.Logging
 {
@@ -78,20 +82,34 @@ namespace Microsoft.Extensions.Logging
             LogLevel minimumLevel = LogLevel.Information,
             IDictionary<string, LogLevel> levelOverrides = null)
         {
-            var levelSwitch = new LoggingLevelSwitch(Conversions.MicrosoftToSerilogLevel(minimumLevel));
+            var levelSwitch = new LoggingLevelSwitch(minimumLevel);
 
-            var configuration = new LoggerConfiguration()
-                .MinimumLevel.ControlledBy(levelSwitch)
-                .Enrich.FromLogContext()
-                .WriteTo.Seq(serverUrl, apiKey: apiKey, controlLevelSwitch: levelSwitch);
+            var sink = new SeqSink(
+                    serverUrl,
+                    apiKey,
+                    1000,
+                    TimeSpan.FromSeconds(2),
+                    256 * 1024,
+                    levelSwitch,
+                    null);
 
-            foreach (var levelOverride in levelOverrides ?? new Dictionary<string, LogLevel>())
+            LevelOverrideMap overrideMap = null;
+            if (levelOverrides != null && levelOverrides.Count != 0)
             {
-                configuration.MinimumLevel.Override(levelOverride.Key, Conversions.MicrosoftToSerilogLevel(levelOverride.Value));
+                var overrides = new Dictionary<string, LoggingLevelSwitch>();
+                foreach (var levelOverride in levelOverrides)
+                {
+                    overrides.Add(levelOverride.Key, new LoggingLevelSwitch(levelOverride.Value));
+                }
+
+                overrideMap = new LevelOverrideMap(overrides, levelSwitch);
             }
 
-            var logger = configuration.CreateLogger();
-            return loggerFactory.AddSerilog(logger, dispose: true);
+            var logger = new Logger(levelSwitch, sink, new LogContextEnricher(), sink.Dispose, overrideMap);
+
+            loggerFactory.AddProvider(new SerilogLoggerProvider(logger));
+
+            return loggerFactory;
         }
     }
 }
