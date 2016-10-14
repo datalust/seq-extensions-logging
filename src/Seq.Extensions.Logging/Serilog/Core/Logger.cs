@@ -33,55 +33,33 @@ namespace Serilog.Core
     {
         static readonly object[] NoPropertyValues = new object[0];
 
-        readonly MessageTemplateProcessor _messageTemplateProcessor;
+        readonly MessageTemplateProcessor _messageTemplateProcessor = new MessageTemplateProcessor(new PropertyValueConverter(10, int.MaxValue));
         readonly ILogEventSink _sink;
         readonly Action _dispose;
         readonly ILogEventEnricher _enricher;
 
-        // It's important that checking minimum level is a very
-        // quick (CPU-cacheable) read in the simple case, hence
-        // we keep a separate field from the switch, which may
-        // not be specified. If it is, we'll set _minimumLevel
-        // to its lower limit and fall through to the secondary check.
-        readonly LogLevel _minimumLevel;
         readonly LoggingLevelSwitch _levelSwitch;
         readonly LevelOverrideMap _overrideMap;
 
         internal Logger(
-            MessageTemplateProcessor messageTemplateProcessor,
-            LogLevel minimumLevel,
-            ILogEventSink sink,
-            ILogEventEnricher enricher,
-            Action dispose = null,
-            LevelOverrideMap overrideMap = null)
-            : this(messageTemplateProcessor, minimumLevel, sink, enricher, dispose, null, overrideMap)
-        {
-        }
-
-        internal Logger(
-            MessageTemplateProcessor messageTemplateProcessor,
             LoggingLevelSwitch levelSwitch,
             ILogEventSink sink,
             ILogEventEnricher enricher,
             Action dispose = null,
             LevelOverrideMap overrideMap = null)
-            : this(messageTemplateProcessor, LevelAlias.Minimum, sink, enricher, dispose, levelSwitch, overrideMap)
+            : this(sink, enricher, dispose, levelSwitch, overrideMap)
         {
         }
 
         // The messageTemplateProcessor, sink and enricher are required. Argument checks are dropped because
         // throwing from here breaks the logger's no-throw contract, and callers are all in this file anyway.
         Logger(
-            MessageTemplateProcessor messageTemplateProcessor,
-            LogLevel minimumLevel,
             ILogEventSink sink,
             ILogEventEnricher enricher,
             Action dispose = null,
             LoggingLevelSwitch levelSwitch = null,
             LevelOverrideMap overrideMap = null)
         {
-            _messageTemplateProcessor = messageTemplateProcessor;
-            _minimumLevel = minimumLevel;
             _sink = sink;
             _dispose = dispose;
             _levelSwitch = levelSwitch;
@@ -100,8 +78,6 @@ namespace Serilog.Core
                 return this; // No context here, so little point writing to SelfLog.
 
             return new Logger(
-                        _messageTemplateProcessor,
-                        _minimumLevel,
                         this,
                         enricher,
                         null,
@@ -143,19 +119,16 @@ namespace Serilog.Core
             // A future optimization opportunity may be to implement ILogEventEnricher on LogEventProperty to
             // remove one more allocation.
             var enricher = new FixedPropertyEnricher(_messageTemplateProcessor.CreateProperty(propertyName, value, destructureObjects));
-
-            var minimumLevel = _minimumLevel;
+            
             var levelSwitch = _levelSwitch;
             if (_overrideMap != null && propertyName == Constants.SourceContextPropertyName)
             {
                 var context = value as string;
                 if (context != null)
-                    _overrideMap.GetEffectiveLevel(context, out minimumLevel, out levelSwitch);
+                    _overrideMap.GetEffectiveLevel(context, out levelSwitch);
             }
 
             return new Logger(
-                _messageTemplateProcessor,
-                minimumLevel,
                 this,
                 enricher,
                 null,
@@ -196,9 +169,7 @@ namespace Serilog.Core
         /// <returns>True if the level is enabled; otherwise, false.</returns>
         public bool IsEnabled(LogLevel level)
         {
-            if ((int) level < (int) _minimumLevel)
-                return false;
-
+  
             return _levelSwitch == null ||
                    (int) level >= (int) _levelSwitch.MinimumLevel;
         }

@@ -15,8 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Seq.Extensions.Logging;
 using Serilog.Events;
+using Seq.Extensions.Logging;
 
 namespace Serilog.Core.Enrichers
 {

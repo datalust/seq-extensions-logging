@@ -15,8 +15,8 @@
 
 using System;
 using Serilog.Core;
-using Serilog.Core.Enrichers;
 using Serilog.Events;
+using Serilog.Core.Enrichers;
 
 #if ASYNCLOCAL
 using System.Collections.Generic;
@@ -29,8 +29,7 @@ using System.Runtime.Remoting.Messaging;
 namespace Serilog.Context
 {
     /// <summary>
-    /// Holds ambient properties that can be attached to log events. To
-    /// configure, use the <see cref="Serilog.Configuration.LoggerEnrichmentConfiguration.FromLogContext"/> method.
+    /// Holds ambient properties that can be attached to log events.
     /// </summary>
     /// <example>
     /// Configuration:

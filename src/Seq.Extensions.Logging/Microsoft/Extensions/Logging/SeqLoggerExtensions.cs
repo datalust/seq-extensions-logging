@@ -6,6 +6,9 @@ using Serilog.Core;
 using Seq.Extensions.Logging;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.Seq;
+using Serilog.Enrichers;
+using Serilog.Parameters;
+using Serilog.Events;
 
 namespace Microsoft.Extensions.Logging
 {
@@ -90,17 +93,20 @@ namespace Microsoft.Extensions.Logging
                     levelSwitch,
                     null);
 
-                var configuration = new LoggerConfiguration()
-                .MinimumLevel.ControlledBy(levelSwitch)
-                .Enrich.FromLogContext()
-                .WriteTo.Sink(sink);
-
-            foreach (var levelOverride in levelOverrides ?? new Dictionary<string, LogLevel>())
+            LevelOverrideMap overrideMap = null;
+            if (levelOverrides != null && levelOverrides.Count != 0)
             {
-                configuration.MinimumLevel.Override(levelOverride.Key, levelOverride.Value);
+                var overrides = new Dictionary<string, LoggingLevelSwitch>();
+                foreach (var levelOverride in levelOverrides)
+                {
+                    overrides.Add(levelOverride.Key, new LoggingLevelSwitch(levelOverride.Value));
+                }
+
+                overrideMap = new LevelOverrideMap(overrides, levelSwitch);
             }
 
-            var logger = configuration.CreateLogger();
+            var logger = new Logger(levelSwitch, sink, new LogContextEnricher(), sink.Dispose, overrideMap);
+
             loggerFactory.AddProvider(new SerilogLoggerProvider(logger));
 
             return loggerFactory;

@@ -13,6 +13,7 @@ using Serilog.Extensions.Logging;
 using Serilog;
 using Seq.Extensions.Logging;
 using Tests.Serilog.Extensions.Logging.Support;
+using Serilog.Core.Enrichers;
 
 namespace Tests.Serilog.Extensions
 {
@@ -25,20 +26,12 @@ namespace Tests.Serilog.Extensions
         {
             var sink = new SerilogSink();
 
-            var config = new LoggerConfiguration()
-                .WriteTo.Sink(sink);
+            var l = new global::Serilog.Core.Logger(new global::Serilog.Core.LoggingLevelSwitch(logLevel), sink, new EmptyEnricher());
 
-            SetMinLevel(config, logLevel);
-
-            var provider = new SerilogLoggerProvider(config.CreateLogger());
+            var provider = new SerilogLoggerProvider(l);
             var logger = (SerilogLogger)provider.CreateLogger(Name);
 
             return new Tuple<SerilogLogger, SerilogSink>(logger, sink);
-        }
-
-        private void SetMinLevel(LoggerConfiguration serilog, LogLevel logLevel)
-        {
-            serilog.MinimumLevel.Is(logLevel);
         }
 
         [Fact]
