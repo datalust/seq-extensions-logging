@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2-*",
+  "version": "2.0.0-*",
 
   "description": "Add centralized structured log collection to ASP.NET Core apps with one line of code.",
   "authors": [ "Datalust and Contributors" ],
@@ -12,18 +12,52 @@
   },
 
   "dependencies": {
-    "Serilog": "2.2.1",
-    "Serilog.Sinks.Seq": "3.0.1",
-    "Serilog.Extensions.Logging": "1.2.0",
-    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0"
+    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0"
   },
 
   "frameworks": {
-    "netstandard1.3": {}
+    "net4.5": {
+      "buildOptions": {
+        "define": [ "REMOTING", "THREADING_TIMER", "WAITABLE_TIMER", "HRESULTS" ]
+      },
+      "frameworkAssemblies": {
+        "System.Net.Http": ""
+      }
+    },
+    "net4.6": {
+      "buildOptions": {
+        "define": [ "ASYNCLOCAL", "THREADING_TIMER", "WAITABLE_TIMER", "HRESULTS" ]
+      },
+      "frameworkAssemblies": {
+        "System.Net.Http": ""
+      }
+    },
+    "netstandard1.3": {
+      "buildOptions": {
+        "define": [ "ASYNCLOCAL", "THREADING_TIMER" ]
+      },
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.1",
+        "System.Collections": "4.0.11",
+        "System.Dynamic.Runtime": "4.0.11",
+        "System.Globalization": "4.0.11",
+        "System.Linq": "4.1.0",
+        "System.Reflection": "4.1.0",
+        "System.Reflection.Extensions": "4.0.1",
+        "System.Runtime": "4.1.0",
+        "System.Runtime.Extensions": "4.1.0",
+        "System.Text.RegularExpressions": "4.1.0",
+        "System.Threading": "4.0.11",
+        "System.Threading.Timer": "4.0.1",
+        "System.Net.Http": "4.1.0"
+      }
+    }
   },
 
   "buildOptions": {
     "warningsAsErrors": true,
-    "xmlDoc": true
+    "xmlDoc": true,
+    "keyFile": "../../asset/seqext.snk"
   }
 }
