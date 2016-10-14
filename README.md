@@ -14,7 +14,7 @@ Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to th
 
 ```json
     "dependencies": {
-        "Seq.Extensions.Logging": "1.0.1"
+        "Seq.Extensions.Logging": "2.0.0"
     }
 ```
 
