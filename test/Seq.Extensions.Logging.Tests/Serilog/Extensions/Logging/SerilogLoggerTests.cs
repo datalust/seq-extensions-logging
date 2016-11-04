@@ -10,12 +10,11 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using Serilog.Extensions.Logging;
-using Serilog;
 using Seq.Extensions.Logging;
 using Tests.Serilog.Extensions.Logging.Support;
 using Serilog.Core.Enrichers;
 
-namespace Tests.Serilog.Extensions
+namespace Tests.Serilog.Extensions.Logging
 {
     public class SerilogLoggerTest
     {
