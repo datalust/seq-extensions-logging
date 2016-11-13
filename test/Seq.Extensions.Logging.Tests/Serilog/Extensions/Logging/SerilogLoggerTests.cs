@@ -343,7 +343,7 @@ namespace Tests.Serilog.Extensions.Logging
             Assert.Equal("Inner", items[1]);
         }
 
-private class FoodScope : IEnumerable<KeyValuePair<string, object>>
+        private class FoodScope : IEnumerable<KeyValuePair<string, object>>
         {
             readonly string _name;
 

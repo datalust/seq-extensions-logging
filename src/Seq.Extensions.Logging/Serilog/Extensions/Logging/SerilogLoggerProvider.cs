@@ -68,6 +68,7 @@ namespace Serilog.Extensions.Logging
                     names.Add(new ScalarValue(name));
                 }
             }
+
             if (names != null)
             {
                 names.Reverse();
