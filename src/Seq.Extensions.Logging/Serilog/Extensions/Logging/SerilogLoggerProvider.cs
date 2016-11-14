@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
 using FrameworkLogger = Microsoft.Extensions.Logging.ILogger;
+using System.Collections.Generic;
 
 namespace Serilog.Extensions.Logging
 {
@@ -21,6 +22,7 @@ namespace Serilog.Extensions.Logging
     class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher
     {
         internal const string OriginalFormatPropertyName = "{OriginalFormat}";
+        internal const string ScopePropertyName = "Scope";
 
         // May be null; if it is, Log.Logger will be lazily used
         readonly Logger _logger;
@@ -54,9 +56,23 @@ namespace Serilog.Extensions.Logging
         /// <inheritdoc />
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
+            List<ScalarValue> names = null;
             for (var scope = CurrentScope; scope != null; scope = scope.Parent)
             {
                 scope.Enrich(logEvent, propertyFactory);
+
+                string name;
+                if (scope.TryGetName(out name))
+                {
+                    names = names ?? new List<ScalarValue>();
+                    names.Add(new ScalarValue(name));
+                }
+            }
+
+            if (names != null)
+            {
+                names.Reverse();
+                logEvent.AddPropertyIfAbsent(new LogEventProperty(ScopePropertyName, new SequenceValue(names)));
             }
         }
 

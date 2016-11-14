@@ -1,5 +1,5 @@
 {
-  "version": "2.0.1-*",
+  "version": "2.1.0-*",
 
   "description": "Add centralized structured log collection to ASP.NET Core apps with one line of code.",
   "authors": [ "Datalust and Contributors" ],
