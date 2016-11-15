@@ -3,17 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace Serilog.Extensions.Logging
 {
-    class SerilogLoggerScope : IDisposable, ILogEventEnricher
+    class SerilogLoggerScope : IDisposable
     {
+        const string NoName = "None";
+
         readonly SerilogLoggerProvider _provider;
         readonly object _state;
-        readonly IDisposable _popSerilogContext;
 
         // An optimization only, no problem if there are data races on this.
         bool _disposed;
@@ -25,11 +25,10 @@ namespace Serilog.Extensions.Logging
 
             Parent = _provider.CurrentScope;
             _provider.CurrentScope = this;
-            _popSerilogContext = LogContext.PushProperties(this);
         }
 
         public SerilogLoggerScope Parent { get; }
-        
+
         public void Dispose()
         {
             if (!_disposed)
@@ -43,20 +42,29 @@ namespace Serilog.Extensions.Logging
                     if (ReferenceEquals(scan, this))
                         _provider.CurrentScope = Parent;
                 }
-
-                _popSerilogContext.Dispose();
             }
         }
 
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+        public void EnrichAndCreateScopeItem(LogEvent logEvent, ILogEventPropertyFactory propertyFactory, out LogEventPropertyValue scopeItem)
         {
+            if (_state == null)
+            {
+                scopeItem = null;
+                return;
+            }
+
             var stateProperties = _state as IEnumerable<KeyValuePair<string, object>>;
             if (stateProperties != null)
             {
+                scopeItem = null; // Unless it's `FormattedLogValues`, these are treated as property bags rather than scope items.
+
                 foreach (var stateProperty in stateProperties)
                 {
                     if (stateProperty.Key == SerilogLoggerProvider.OriginalFormatPropertyName && stateProperty.Value is string)
+                    {
+                        scopeItem = new ScalarValue(_state.ToString());
                         continue;
+                    }
 
                     var key = stateProperty.Key;
                     var destructureObject = false;
@@ -66,17 +74,15 @@ namespace Serilog.Extensions.Logging
                         key = key.Substring(1);
                         destructureObject = true;
                     }
-                    
+
                     var property = propertyFactory.CreateProperty(key, stateProperty.Value, destructureObject);
                     logEvent.AddPropertyIfAbsent(property);
                 }
             }
-        }
-
-        public bool TryGetName(out string name)
-        {
-            name = _state as string;
-            return name != null;
+            else
+            {
+                scopeItem = propertyFactory.CreateProperty(NoName, _state).Value;
+            }
         }
     }
 }
