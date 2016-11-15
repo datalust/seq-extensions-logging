@@ -231,16 +231,16 @@ namespace Serilog.Formatting.Json
         {
             if (double.IsInfinity(value) || double.IsNaN(value))
                 FormatStringValue(value.ToString(CultureInfo.InvariantCulture), output);
-
-            output.Write(value.ToString("R", CultureInfo.InvariantCulture));
+            else
+                output.Write(value.ToString("R", CultureInfo.InvariantCulture));
         }
 
         static void FormatFloatValue(float value, TextWriter output)
         {
             if (float.IsInfinity(value) || float.IsNaN(value))
                 FormatStringValue(value.ToString(CultureInfo.InvariantCulture), output);
-
-            output.Write(value.ToString("R", CultureInfo.InvariantCulture));
+            else
+                output.Write(value.ToString("R", CultureInfo.InvariantCulture));
         }
 
         static void FormatExactNumericValue(IFormattable value, TextWriter output)
