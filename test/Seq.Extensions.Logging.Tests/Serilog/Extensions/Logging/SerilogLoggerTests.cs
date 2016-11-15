@@ -25,7 +25,7 @@ namespace Tests.Serilog.Extensions.Logging
         {
             var sink = new SerilogSink();
 
-            var l = new global::Serilog.Core.Logger(new global::Serilog.Core.LoggingLevelSwitch(logLevel), sink, new EmptyEnricher());
+            var l = new global::Serilog.Core.Logger(new global::Serilog.Core.LoggingLevelSwitch(logLevel), sink);
 
             var provider = new SerilogLoggerProvider(l);
             var logger = (SerilogLogger)provider.CreateLogger(Name);

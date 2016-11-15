@@ -18,7 +18,15 @@ namespace WebApplication.Controllers
 
         public IActionResult Index()
         {
-            _log.LogInformation("Hello, world!");
+            _log.LogInformation("Hello, {Name}!", "world");
+
+            using (_log.BeginScope("Example"))
+            using (_log.BeginScope(42))
+            using (_log.BeginScope("Process {OrderId}", 12345))
+            using (_log.BeginScope(new Dictionary<string, object> { ["MessageId"] = 100 }))
+            {
+                _log.LogInformation("Events in this block have additional properties attached");
+            }
 
             return View();
         }

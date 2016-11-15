@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Serilog;
 using Serilog.Core;
 using Seq.Extensions.Logging;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.Seq;
-using Serilog.Enrichers;
-using Serilog.Parameters;
-using Serilog.Events;
 
 namespace Microsoft.Extensions.Logging
 {
@@ -105,7 +101,7 @@ namespace Microsoft.Extensions.Logging
                 overrideMap = new LevelOverrideMap(overrides, levelSwitch);
             }
 
-            var logger = new Logger(levelSwitch, sink, new LogContextEnricher(), sink.Dispose, overrideMap);
+            var logger = new Logger(levelSwitch, sink, sink.Dispose, overrideMap);
 
             loggerFactory.AddProvider(new SerilogLoggerProvider(logger));
 
