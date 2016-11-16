@@ -56,23 +56,23 @@ namespace Serilog.Extensions.Logging
         /// <inheritdoc />
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            List<ScalarValue> names = null;
+            List<LogEventPropertyValue> scopeItems = null;
             for (var scope = CurrentScope; scope != null; scope = scope.Parent)
             {
-                scope.Enrich(logEvent, propertyFactory);
+                LogEventPropertyValue scopeItem;
+                scope.EnrichAndCreateScopeItem(logEvent, propertyFactory, out scopeItem);
 
-                string name;
-                if (scope.TryGetName(out name))
+                if (scopeItem != null)
                 {
-                    names = names ?? new List<ScalarValue>();
-                    names.Add(new ScalarValue(name));
+                    scopeItems = scopeItems ?? new List<LogEventPropertyValue>();
+                    scopeItems.Add(scopeItem);
                 }
             }
 
-            if (names != null)
+            if (scopeItems != null)
             {
-                names.Reverse();
-                logEvent.AddPropertyIfAbsent(new LogEventProperty(ScopePropertyName, new SequenceValue(names)));
+                scopeItems.Reverse();
+                logEvent.AddPropertyIfAbsent(new LogEventProperty(ScopePropertyName, new SequenceValue(scopeItems)));
             }
         }
 

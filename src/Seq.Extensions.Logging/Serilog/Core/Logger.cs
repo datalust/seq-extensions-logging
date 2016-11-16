@@ -44,10 +44,9 @@ namespace Serilog.Core
         internal Logger(
             LoggingLevelSwitch levelSwitch,
             ILogEventSink sink,
-            ILogEventEnricher enricher,
             Action dispose = null,
             LevelOverrideMap overrideMap = null)
-            : this(sink, enricher, dispose, levelSwitch, overrideMap)
+            : this(sink, new EmptyEnricher(), dispose, levelSwitch, overrideMap)
         {
         }
 
