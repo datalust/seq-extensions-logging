@@ -46,7 +46,7 @@ namespace Serilog.Core
             ILogEventSink sink,
             Action dispose = null,
             LevelOverrideMap overrideMap = null)
-            : this(sink, new EmptyEnricher(), dispose, levelSwitch, overrideMap)
+            : this(sink, new ExceptionDataEnricher(), dispose, levelSwitch, overrideMap)
         {
         }
 
