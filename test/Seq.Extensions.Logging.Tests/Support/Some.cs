@@ -4,6 +4,7 @@ using Serilog.Events;
 using Xunit.Sdk;
 using Serilog.Core;
 using Microsoft.Extensions.Logging;
+using Serilog.Parameters;
 
 namespace Tests.Support
 {
@@ -17,6 +18,11 @@ namespace Tests.Support
         public static LogEvent LogEvent(Exception exception, string messageTemplate, params object[] propertyValues)
         {
             return LogEvent(LogLevel.Information, exception, messageTemplate, propertyValues);
+        }
+
+        public static ILogEventPropertyFactory PropertyFactory()
+        {
+            return new PropertyValueConverter(10, 1024);
         }
 
         public static LogEvent LogEvent(LogLevel level, Exception exception, string messageTemplate, params object[] propertyValues)
@@ -43,9 +49,9 @@ namespace Tests.Support
             return LogEvent(LogLevel.Information, null, "Information event");
         }
 
-        public static LogEvent ErrorEvent()
+        public static LogEvent ErrorEvent(Exception exception = null)
         {
-            return LogEvent(LogLevel.Error, null, "Error event");
+            return LogEvent(LogLevel.Error, exception, "Error event");
         }
     }
 }
