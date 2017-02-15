@@ -95,21 +95,32 @@ namespace Serilog.Extensions.Logging
                 }
             }
 
-            if (messageTemplate == null && state != null)
+            if (messageTemplate == null)
             {
-                messageTemplate = "{State:l}";
-                LogEventProperty stateProperty;
-                if (logger.BindProperty("State", AsLoggableValue(state, formatter), false, out stateProperty))
-                    properties.Add(stateProperty);
-            }
+                string propertyName = null;
+                if (state != null)
+                {
+                    propertyName = "State";
+                    messageTemplate = "{State:l}";
+                }
+                else if (formatter != null)
+                {
+                    propertyName = "Message";
+                    messageTemplate = "{Message:l}";
+                }
 
-            if (string.IsNullOrEmpty(messageTemplate))
-                return;
+                if (propertyName != null)
+                {
+                    LogEventProperty property;
+                    if (logger.BindProperty(propertyName, AsLoggableValue(state, formatter), false, out property))
+                        properties.Add(property);
+                }
+            }
 
             if (eventId.Id != 0 || eventId.Name != null)
                 properties.Add(CreateEventIdProperty(eventId));
 
-            var parsedTemplate = _messageTemplateParser.Parse(messageTemplate);
+            var parsedTemplate = _messageTemplateParser.Parse(messageTemplate ?? "");
             var evt = new LogEvent(DateTimeOffset.Now, level, exception, parsedTemplate, properties);
             logger.Write(evt);
         }
