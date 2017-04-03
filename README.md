@@ -10,12 +10,10 @@ This package makes it a one-liner to configure ASP.NET Core logging with Seq.
 
 ### Getting started
 
-Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to the `dependencies` section of your `project.json` file:
+Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to your project either by editing the CSPROJ file, or using the NuGet package manager:
 
-```json
-    "dependencies": {
-        "Seq.Extensions.Logging": "2.1.2"
-    }
+```powershell
+Install-Package Seq.Extensions.Logging
 ```
 
 In your `Startup` class's `Configure()` method, call `AddSeq()` on the provided `loggerFactory`.
