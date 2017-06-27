@@ -37,8 +37,8 @@ namespace Serilog.Sinks.PeriodicBatching
         static readonly TimeSpan MinimumBackoffPeriod = TimeSpan.FromSeconds(5);
         static readonly TimeSpan MaximumBackoffInterval = TimeSpan.FromMinutes(10);
 
-        const int FailuresBeforeDroppingBatch = 4;
-        const int FailuresBeforeDroppingQueue = 6;
+        const int FailuresBeforeDroppingBatch = 8;
+        const int FailuresBeforeDroppingQueue = 10;
 
         readonly TimeSpan _period;
 
