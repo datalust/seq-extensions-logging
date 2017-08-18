@@ -19,11 +19,10 @@ Install-Package Seq.Extensions.Logging
 In your `Startup` class's `Configure()` method, call `AddSeq()` on the provided `loggerFactory`.
 
 ```csharp
-    public void Configure(IApplicationBuilder app,
-                        IHostingEnvironment env,
-                        ILoggerFactory loggerFactory)
+    public void ConfigureServices(IServiceCollection services)
     {
-        loggerFactory.AddSeq("http://localhost:5341");
+        services.AddLogging(loggingBuilder =>
+            loggingBuilder.AddSeq("http://localhost:5341"));
 ```
 
 The framework will inject `ILogger` instances into controllers and other classes:
@@ -98,7 +97,7 @@ In `appsettings.json` add a `"Seq"` property:
 And then pass the configuration section to the `AddSeq()` method:
 
 ```csharp
-        loggerFactory.AddSeq(Configuration.GetSection("Seq"));
+        loggingBuilder.AddSeq(Configuration.GetSection("Seq"));
 ```
 
 ### Dynamic log level control
