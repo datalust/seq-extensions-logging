@@ -13,6 +13,8 @@ namespace Microsoft.Extensions.Logging
     /// </summary>
     public static class SeqLoggerExtensions
     {
+        const string LocalServerUrl = "http://localhost:5341";
+
         /// <summary>
         /// Adds a Seq logger configured from the supplied configuration section.
         /// </summary>
@@ -24,11 +26,96 @@ namespace Microsoft.Extensions.Logging
             if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
+            if (TryCreateProvider(configuration, out var provider))
+                loggerFactory.AddProvider(provider);
+
+            return loggerFactory;
+        }
+
+        /// <summary>
+        /// Adds a Seq logger.
+        /// </summary>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="serverUrl">The Seq server URL; the default is http://localhost:5341.</param>
+        /// <param name="apiKey">A Seq API key to authenticate or tag messages from the logger.</param>
+        /// <param name="minimumLevel">The level below which events will be suppressed (the default is <see cref="LogLevel.Information"/>).</param>
+        /// <param name="levelOverrides">A dictionary mapping logger name prefixes to minimum logging levels.</param>
+        /// <returns>A logger factory to allow further configuration.</returns>
+        public static ILoggerFactory AddSeq(
+            this ILoggerFactory loggerFactory,
+            string serverUrl = LocalServerUrl,
+            string apiKey = null,
+            LogLevel minimumLevel = LogLevel.Information,
+            IDictionary<string, LogLevel> levelOverrides = null)
+        {
+            if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
+            if (serverUrl == null) throw new ArgumentNullException(nameof(serverUrl));
+
+            var provider = CreateProvider(serverUrl, apiKey, minimumLevel, levelOverrides);
+            loggerFactory.AddProvider(provider);
+            return loggerFactory;
+        }
+
+
+#if LOGGING_BUILDER
+
+        /// <summary>
+        /// Adds a Seq logger.
+        /// </summary>
+        /// <param name="loggingBuilder">The logging builder.</param>
+        /// <param name="serverUrl">The Seq server URL; the default is http://localhost:5341.</param>
+        /// <param name="apiKey">A Seq API key to authenticate or tag messages from the logger.</param>
+        /// <param name="minimumLevel">The level below which events will be suppressed (the default is <see cref="LogLevel.Information"/>).</param>
+        /// <param name="levelOverrides">A dictionary mapping logger name prefixes to minimum logging levels.</param>
+        /// <returns>A logging builder to allow further configuration.</returns>
+        public static ILoggingBuilder AddSeq(
+            this ILoggingBuilder loggingBuilder,
+            string serverUrl = LocalServerUrl,
+            string apiKey = null,
+            LogLevel minimumLevel = LogLevel.Information,
+            IDictionary<string, LogLevel> levelOverrides = null)
+        {
+            if (loggingBuilder == null) throw new ArgumentNullException(nameof(loggingBuilder));
+            if (serverUrl == null) throw new ArgumentNullException(nameof(serverUrl));
+
+            var provider = CreateProvider(serverUrl, apiKey, minimumLevel, levelOverrides);
+
+            loggingBuilder.AddProvider(provider);
+
+            return loggingBuilder;
+        }
+
+        /// <summary>
+        /// Adds a Seq logger configured from the supplied configuration section.
+        /// </summary>
+        /// <param name="loggingBuilder">The logging builder.</param>
+        /// <param name="configuration">A configuration section with details of the Seq server connection.</param>
+        /// <returns>A logging builder to allow further configuration.</returns>
+        public static ILoggingBuilder AddSeq(
+            this ILoggingBuilder loggingBuilder,
+            IConfigurationSection configuration)
+        {
+            if (loggingBuilder == null) throw new ArgumentNullException(nameof(loggingBuilder));
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+
+            if (TryCreateProvider(configuration, out var provider))
+                loggingBuilder.AddProvider(provider);
+
+            return loggingBuilder;
+        }
+
+#endif
+
+        static bool TryCreateProvider(
+            IConfigurationSection configuration,
+            out SerilogLoggerProvider provider)
+        {
             var serverUrl = configuration["ServerUrl"];
             if (string.IsNullOrWhiteSpace(serverUrl))
             {
                 SelfLog.WriteLine("Unable to add the Seq logger: no ServerUrl was present in the configuration");
-                return loggerFactory;
+                provider = null;
+                return false;
             }
 
             var apiKey = configuration["ApiKey"];
@@ -59,35 +146,26 @@ namespace Microsoft.Extensions.Logging
                 levelOverrides[overr.Key] = value;
             }
 
-            return loggerFactory.AddSeq(serverUrl, apiKey, minimumLevel, levelOverrides);
+            provider = CreateProvider(serverUrl, apiKey, minimumLevel, levelOverrides);
+            return true;
         }
 
-        /// <summary>
-        /// Adds a Seq logger configured from the supplied configuration section.
-        /// </summary>
-        /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="serverUrl"></param>
-        /// <param name="apiKey">A Seq API key to authenticate or tag messages from the logger.</param>
-        /// <param name="minimumLevel">The level below which events will be suppressed (the default is <see cref="LogLevel.Information"/>).</param>
-        /// <param name="levelOverrides">A dictionary mapping logger name prefixes to minimum logging levels.</param>
-        /// <returns>A logger factory to allow further configuration.</returns>
-        public static ILoggerFactory AddSeq(
-            this ILoggerFactory loggerFactory,
+        static SerilogLoggerProvider CreateProvider(
             string serverUrl,
-            string apiKey = null,
-            LogLevel minimumLevel = LogLevel.Information,
-            IDictionary<string, LogLevel> levelOverrides = null)
+            string apiKey,
+            LogLevel minimumLevel,
+            IDictionary<string, LogLevel> levelOverrides)
         {
             var levelSwitch = new LoggingLevelSwitch(minimumLevel);
 
             var sink = new SeqSink(
-                    serverUrl,
-                    apiKey,
-                    1000,
-                    TimeSpan.FromSeconds(2),
-                    256 * 1024,
-                    levelSwitch,
-                    null);
+                serverUrl,
+                apiKey,
+                1000,
+                TimeSpan.FromSeconds(2),
+                256 * 1024,
+                levelSwitch,
+                null);
 
             LevelOverrideMap overrideMap = null;
             if (levelOverrides != null && levelOverrides.Count != 0)
@@ -102,10 +180,8 @@ namespace Microsoft.Extensions.Logging
             }
 
             var logger = new Logger(levelSwitch, sink, sink.Dispose, overrideMap);
-
-            loggerFactory.AddProvider(new SerilogLoggerProvider(logger));
-
-            return loggerFactory;
+            var provider = new SerilogLoggerProvider(logger);
+            return provider;
         }
     }
 }

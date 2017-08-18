@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0069BFD6-B0EE-4204-A85F-F75E31A77B3C}"
 EndProject
@@ -9,20 +9,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "global", "global", "{B0D573
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
-		global.json = global.json
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Seq.Extensions.Logging", "src\Seq.Extensions.Logging\Seq.Extensions.Logging.xproj", "{E640A22A-DF3C-40A2-AC72-DEB2F9B16241}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D54DE844-AC36-4872-928F-5F573D41ACAE}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Seq.Extensions.Logging.Tests", "test\Seq.Extensions.Logging.Tests\Seq.Extensions.Logging.Tests.xproj", "{64A3F2C5-D71E-44A6-8DC7-99474765B32E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{1C72E771-7C72-4A30-A408-5CE66E792ADF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WebApplication", "example\WebApplication\WebApplication.xproj", "{FC44EC1F-AD83-4522-99B4-4B309B8CC78A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seq.Extensions.Logging", "src\Seq.Extensions.Logging\Seq.Extensions.Logging.csproj", "{E640A22A-DF3C-40A2-AC72-DEB2F9B16241}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seq.Extensions.Logging.Tests", "test\Seq.Extensions.Logging.Tests\Seq.Extensions.Logging.Tests.csproj", "{64A3F2C5-D71E-44A6-8DC7-99474765B32E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication", "example\WebApplication\WebApplication.csproj", "{FC44EC1F-AD83-4522-99B4-4B309B8CC78A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,5 +49,8 @@ Global
 		{E640A22A-DF3C-40A2-AC72-DEB2F9B16241} = {0069BFD6-B0EE-4204-A85F-F75E31A77B3C}
 		{64A3F2C5-D71E-44A6-8DC7-99474765B32E} = {D54DE844-AC36-4872-928F-5F573D41ACAE}
 		{FC44EC1F-AD83-4522-99B4-4B309B8CC78A} = {1C72E771-7C72-4A30-A408-5CE66E792ADF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A6DD7789-D2A5-43A4-A4FE-E138166E15C7}
 	EndGlobalSection
 EndGlobal

@@ -36,7 +36,7 @@ namespace Serilog.Sinks.Seq
 
         static readonly JsonValueFormatter JsonValueFormatter = new JsonValueFormatter();
 
-        ControlledLevelSwitch _controlledSwitch;
+        readonly ControlledLevelSwitch _controlledSwitch;
         static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
         DateTime _nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
 
