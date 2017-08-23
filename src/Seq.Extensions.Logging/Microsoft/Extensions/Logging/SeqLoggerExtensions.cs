@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Seq.Extensions.Logging;
+using Serilog.Events;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.Seq;
 
@@ -26,7 +27,7 @@ namespace Microsoft.Extensions.Logging
             if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            if (TryCreateProvider(configuration, out var provider))
+            if (TryCreateProvider(configuration, LogLevel.Information, out var provider))
                 loggerFactory.AddProvider(provider);
 
             return loggerFactory;
@@ -65,20 +66,16 @@ namespace Microsoft.Extensions.Logging
         /// <param name="loggingBuilder">The logging builder.</param>
         /// <param name="serverUrl">The Seq server URL; the default is http://localhost:5341.</param>
         /// <param name="apiKey">A Seq API key to authenticate or tag messages from the logger.</param>
-        /// <param name="minimumLevel">The level below which events will be suppressed (the default is <see cref="LogLevel.Information"/>).</param>
-        /// <param name="levelOverrides">A dictionary mapping logger name prefixes to minimum logging levels.</param>
         /// <returns>A logging builder to allow further configuration.</returns>
         public static ILoggingBuilder AddSeq(
             this ILoggingBuilder loggingBuilder,
             string serverUrl = LocalServerUrl,
-            string apiKey = null,
-            LogLevel minimumLevel = LogLevel.Information,
-            IDictionary<string, LogLevel> levelOverrides = null)
+            string apiKey = null)
         {
             if (loggingBuilder == null) throw new ArgumentNullException(nameof(loggingBuilder));
             if (serverUrl == null) throw new ArgumentNullException(nameof(serverUrl));
 
-            var provider = CreateProvider(serverUrl, apiKey, minimumLevel, levelOverrides);
+            var provider = CreateProvider(serverUrl, apiKey, LevelAlias.Minimum, null);
 
             loggingBuilder.AddProvider(provider);
 
@@ -98,7 +95,7 @@ namespace Microsoft.Extensions.Logging
             if (loggingBuilder == null) throw new ArgumentNullException(nameof(loggingBuilder));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            if (TryCreateProvider(configuration, out var provider))
+            if (TryCreateProvider(configuration, LevelAlias.Minimum, out var provider))
                 loggingBuilder.AddProvider(provider);
 
             return loggingBuilder;
@@ -108,6 +105,7 @@ namespace Microsoft.Extensions.Logging
 
         static bool TryCreateProvider(
             IConfigurationSection configuration,
+            LogLevel defaultMinimumLevel,
             out SerilogLoggerProvider provider)
         {
             var serverUrl = configuration["ServerUrl"];
@@ -122,7 +120,7 @@ namespace Microsoft.Extensions.Logging
             if (string.IsNullOrWhiteSpace(apiKey))
                 apiKey = null;
 
-            var minimumLevel = LogLevel.Information;
+            var minimumLevel = defaultMinimumLevel;
             var levelSetting = configuration["MinimumLevel"];
             if (!string.IsNullOrWhiteSpace(levelSetting))
             {
