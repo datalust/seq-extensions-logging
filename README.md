@@ -18,7 +18,7 @@ Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to yo
 Install-Package Seq.Extensions.Logging
 ```
 
-In `Program.cs`, call `AddSeq()` on the provided `loggingBuilder`.
+In `Program.cs`, call `AddSeq()` on the provided `ILoggingBuilder`.
 
 ```csharp
 public static void Main(string[] args)
@@ -37,8 +37,8 @@ public static void Main(string[] args)
         {
             logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
 
-			// Add this line
-			logging.AddSeq("http://localhost:5341")
+            // Add this line
+            logging.AddSeq("http://localhost:5341")
 
             logging.AddConsole();
             logging.AddDebug();
@@ -132,7 +132,7 @@ An additional root `"Seq"` property is used to configure the server URL and API 
 pass the configuration section to the `AddSeq()` method:
 
 ```csharp
-        loggingBuilder.AddSeq(Configuration.GetSection("Seq"));
+        logging.AddSeq(Configuration.GetSection("Seq"));
 ```
 
 ### Dynamic log level control
