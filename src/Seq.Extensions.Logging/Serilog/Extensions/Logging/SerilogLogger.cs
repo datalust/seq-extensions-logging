@@ -21,15 +21,13 @@ namespace Serilog.Extensions.Logging
 
         public SerilogLogger(
             SerilogLoggerProvider provider,
-            Logger logger = null,
+            Logger logger,
             string name = null)
         {
-            if (provider == null) throw new ArgumentNullException(nameof(provider));
-            _provider = provider;
-            _logger = logger;
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
 
-            // If a logger was passed, the provider has already added itself as an enricher
-            _logger = _logger.ForContext(new[] { provider });
+            _logger = logger.ForContext(new[] { provider });
 
             if (name != null)
             {
@@ -39,7 +37,7 @@ namespace Serilog.Extensions.Logging
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return _logger.IsEnabled(ConvertLevel(logLevel));
+            return _logger.IsEnabled(logLevel);
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -49,8 +47,7 @@ namespace Serilog.Extensions.Logging
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            var level = ConvertLevel(logLevel);
-            if (!_logger.IsEnabled(level))
+            if (!_logger.IsEnabled(logLevel))
             {
                 return;
             }
@@ -121,7 +118,7 @@ namespace Serilog.Extensions.Logging
                 properties.Add(CreateEventIdProperty(eventId));
 
             var parsedTemplate = _messageTemplateParser.Parse(messageTemplate ?? "");
-            var evt = new LogEvent(DateTimeOffset.Now, level, exception, parsedTemplate, properties);
+            var evt = new LogEvent(DateTimeOffset.Now, logLevel, exception, parsedTemplate, properties);
             logger.Write(evt);
         }
 
@@ -131,27 +128,6 @@ namespace Serilog.Extensions.Logging
             if (formatter != null)
                 sobj = formatter(state, null);
             return sobj;
-        }
-
-        static LogLevel ConvertLevel(LogLevel logLevel)
-        {
-            switch (logLevel)
-            {
-                case LogLevel.Critical:
-                    return LogLevel.Critical;
-                case LogLevel.Error:
-                    return LogLevel.Error;
-                case LogLevel.Warning:
-                    return LogLevel.Warning;
-                case LogLevel.Information:
-                    return LogLevel.Information;
-                case LogLevel.Debug:
-                    return LogLevel.Debug;
-                // ReSharper disable once RedundantCaseLabel
-                case LogLevel.Trace:
-                default:
-                    return LogLevel.Trace;
-            }
         }
 
         static LogEventProperty CreateEventIdProperty(EventId eventId)

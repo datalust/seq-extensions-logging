@@ -19,6 +19,7 @@ namespace WebApplication.Controllers
         public IActionResult Index()
         {
             _log.LogInformation("Hello, {Name}!", "world");
+            _log.LogDebug("Hello, again!");
 
             using (_log.BeginScope("Example"))
             using (_log.BeginScope(42))
