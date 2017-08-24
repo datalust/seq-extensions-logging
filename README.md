@@ -10,20 +10,44 @@ This package makes it a one-liner to configure ASP.NET Core logging with Seq.
 
 ### Getting started
 
+The instructions that follow are for **.NET Core 2.0+**.
+
 Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to your project either by editing the CSPROJ file, or using the NuGet package manager:
 
 ```powershell
 Install-Package Seq.Extensions.Logging
 ```
 
-In your `Startup` class's `Configure()` method, call `AddSeq()` on the provided `loggerFactory`.
+In `Program.cs`, call `AddSeq()` on the provided `ILoggingBuilder`.
 
 ```csharp
-    public void Configure(IApplicationBuilder app,
-                        IHostingEnvironment env,
-                        ILoggerFactory loggerFactory)
-    {
-        loggerFactory.AddSeq("http://localhost:5341");
+public static void Main(string[] args)
+{
+    var webHost = new WebHostBuilder()
+        .UseKestrel()
+        .UseContentRoot(Directory.GetCurrentDirectory())
+        .ConfigureAppConfiguration((hostingContext, config) =>
+        {
+            var env = hostingContext.HostingEnvironment;
+            config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                  .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+            config.AddEnvironmentVariables();
+        })
+        .ConfigureLogging((hostingContext, logging) =>
+        {
+            logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+
+            // Add this line
+            logging.AddSeq("http://localhost:5341")
+
+            logging.AddConsole();
+            logging.AddDebug();
+        })
+        .UseStartup<Startup>()
+        .Build();
+
+    webHost.Run();
+}
 ```
 
 The framework will inject `ILogger` instances into controllers and other classes:
@@ -78,27 +102,37 @@ The `AddSeq()` method exposes some basic options for controlling the connection 
 
 ### JSON configuration
 
-The Seq server URL, API key and other settings can be read from JSON configuration if desired.
+The logging level, Seq server URL, API key and other settings can be read from JSON configuration if desired.
 
-In `appsettings.json` add a `"Seq"` property:
+In `appsettings.json` add a `"Seq"` property to `"Logging"` to configure levels for the Seq provider:
 
 ```json
 {
+  "Logging": {
+    "IncludeScopes": false,
+    "LogLevel": {
+      "Default": "Information"
+    },
+    "Seq": {
+      "LogLevel": {
+        "Default": "Trace",
+        "System": "Information",
+        "Microsoft": "Warning"
+      }
+    }
+  },
   "Seq": {
     "ServerUrl": "http://localhost:5341",
     "ApiKey": "1234567890",
-    "MinimumLevel": "Trace",
-    "LevelOverride": {
-      "Microsoft": "Warning"
-    }
   }
 }
 ```
 
-And then pass the configuration section to the `AddSeq()` method:
+An additional root `"Seq"` property is used to configure the server URL and API key. To use this,
+pass the configuration section to the `AddSeq()` method:
 
 ```csharp
-        loggerFactory.AddSeq(Configuration.GetSection("Seq"));
+        logging.AddSeq(Configuration.GetSection("Seq"));
 ```
 
 ### Dynamic log level control

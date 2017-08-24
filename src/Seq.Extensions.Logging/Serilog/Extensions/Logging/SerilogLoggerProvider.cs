@@ -19,6 +19,9 @@ namespace Serilog.Extensions.Logging
     /// <summary>
     /// An <see cref="ILoggerProvider"/> that pipes events through Serilog.
     /// </summary>
+#if LOGGING_BUILDER
+    [ProviderAlias("Seq")]
+#endif
     class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher
     {
         internal const string OriginalFormatPropertyName = "{OriginalFormat}";
@@ -26,7 +29,6 @@ namespace Serilog.Extensions.Logging
 
         // May be null; if it is, Log.Logger will be lazily used
         readonly Logger _logger;
-        readonly Action _dispose;
 
         /// <summary>
         /// Construct a <see cref="SerilogLoggerProvider"/>.
@@ -38,7 +40,6 @@ namespace Serilog.Extensions.Logging
                 throw new ArgumentNullException(nameof(logger));
 
             _logger = logger.ForContext(new[] { this });
-            _dispose = () => (logger as IDisposable)?.Dispose();
         }
 
         /// <inheritdoc />
@@ -81,14 +82,8 @@ namespace Serilog.Extensions.Logging
 
         internal SerilogLoggerScope CurrentScope
         {
-            get
-            {
-                return _value.Value;
-            }
-            set
-            {
-                _value.Value = value;
-            }
+            get => _value.Value;
+            set => _value.Value = value;
         }
 #else
         readonly string _currentScopeKey = nameof(SerilogLoggerScope) + "#" + Guid.NewGuid().ToString("n");
@@ -100,17 +95,14 @@ namespace Serilog.Extensions.Logging
                 var objectHandle = CallContext.LogicalGetData(_currentScopeKey) as ObjectHandle;
                 return objectHandle?.Unwrap() as SerilogLoggerScope;
             }
-            set
-            {
-                CallContext.LogicalSetData(_currentScopeKey, new ObjectHandle(value));
-            }
+            set => CallContext.LogicalSetData(_currentScopeKey, new ObjectHandle(value));
         }
 #endif
 
         /// <inheritdoc />
         public void Dispose()
         {
-            _dispose?.Invoke();
+            _logger.Dispose();
         }
     }
 }

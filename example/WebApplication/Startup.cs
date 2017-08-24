@@ -25,6 +25,9 @@ namespace WebApplication
         {
             services.AddLogging(loggingBuilder =>
             {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddConfiguration(Configuration.GetSection("Logging"));
+                
                 // Add a Seq logger.
                 loggingBuilder.AddSeq(Configuration.GetSection("Seq"));
 
