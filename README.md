@@ -38,7 +38,7 @@ public static void Main(string[] args)
             logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
 
             // Add this line
-            logging.AddSeq("http://localhost:5341")
+            logging.AddSeq("http://localhost:5341");
 
             logging.AddConsole();
             logging.AddDebug();
