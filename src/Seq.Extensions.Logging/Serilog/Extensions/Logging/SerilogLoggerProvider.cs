@@ -27,8 +27,8 @@ namespace Serilog.Extensions.Logging
         internal const string OriginalFormatPropertyName = "{OriginalFormat}";
         internal const string ScopePropertyName = "Scope";
 
-        // May be null; if it is, Log.Logger will be lazily used
         readonly Logger _logger;
+        readonly Action _dispose;
 
         /// <summary>
         /// Construct a <see cref="SerilogLoggerProvider"/>.
@@ -39,6 +39,7 @@ namespace Serilog.Extensions.Logging
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
+            _dispose = logger.Dispose;
             _logger = logger.ForContext(new[] { this });
         }
 
@@ -48,7 +49,6 @@ namespace Serilog.Extensions.Logging
             return new SerilogLogger(this, _logger, name);
         }
 
-        /// <inheritdoc />
         public IDisposable BeginScope<T>(T state)
         {
             return new SerilogLoggerScope(this, state);
@@ -102,7 +102,7 @@ namespace Serilog.Extensions.Logging
         /// <inheritdoc />
         public void Dispose()
         {
-            _logger.Dispose();
+            _dispose();
         }
     }
 }
