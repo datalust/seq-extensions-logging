@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Add centralized structured log collection to ASP.NET Core apps with one line of code.</Description>
-    <VersionPrefix>4.0.2</VersionPrefix>
+    <VersionPrefix>4.0.3</VersionPrefix>
     <Authors>Datalust and Contributors</Authors>
     <TargetFrameworks>net45;net46;net461;netstandard1.3;netstandard2.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
