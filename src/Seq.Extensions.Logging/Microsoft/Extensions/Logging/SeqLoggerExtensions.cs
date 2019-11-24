@@ -7,6 +7,10 @@ using Serilog.Events;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.Seq;
 
+#if LOGGING_BUILDER
+using Microsoft.Extensions.DependencyInjection;
+#endif
+
 namespace Microsoft.Extensions.Logging
 {
     /// <summary>
@@ -77,7 +81,7 @@ namespace Microsoft.Extensions.Logging
 
             var provider = CreateProvider(serverUrl, apiKey, LevelAlias.Minimum, null);
 
-            loggingBuilder.AddProvider(provider);
+            loggingBuilder.Services.AddSingleton<ILoggerProvider>(_ => provider);
 
             return loggingBuilder;
         }
@@ -96,7 +100,7 @@ namespace Microsoft.Extensions.Logging
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
             if (TryCreateProvider(configuration, LevelAlias.Minimum, out var provider))
-                loggingBuilder.AddProvider(provider);
+                loggingBuilder.Services.AddSingleton<ILoggerProvider>(_ => provider);
 
             return loggingBuilder;
         }
