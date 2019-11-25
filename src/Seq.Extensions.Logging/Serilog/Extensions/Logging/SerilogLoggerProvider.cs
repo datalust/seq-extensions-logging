@@ -2,12 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-#if ASYNCLOCAL
 using System.Threading;
-#else
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Messaging;
-#endif
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
@@ -19,9 +14,7 @@ namespace Serilog.Extensions.Logging
     /// <summary>
     /// An <see cref="ILoggerProvider"/> that pipes events through Serilog.
     /// </summary>
-#if LOGGING_BUILDER
     [ProviderAlias("Seq")]
-#endif
     class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher
     {
         internal const string OriginalFormatPropertyName = "{OriginalFormat}";
@@ -77,7 +70,6 @@ namespace Serilog.Extensions.Logging
             }
         }
 
-#if ASYNCLOCAL
         readonly AsyncLocal<SerilogLoggerScope> _value = new AsyncLocal<SerilogLoggerScope>();
 
         internal SerilogLoggerScope CurrentScope
@@ -85,19 +77,6 @@ namespace Serilog.Extensions.Logging
             get => _value.Value;
             set => _value.Value = value;
         }
-#else
-        readonly string _currentScopeKey = nameof(SerilogLoggerScope) + "#" + Guid.NewGuid().ToString("n");
-
-        internal SerilogLoggerScope CurrentScope
-        {
-            get
-            {
-                var objectHandle = CallContext.LogicalGetData(_currentScopeKey) as ObjectHandle;
-                return objectHandle?.Unwrap() as SerilogLoggerScope;
-            }
-            set => CallContext.LogicalSetData(_currentScopeKey, new ObjectHandle(value));
-        }
-#endif
 
         /// <inheritdoc />
         public void Dispose()
