@@ -11,6 +11,10 @@ using Serilog.Sinks.Seq;
 using Microsoft.Extensions.DependencyInjection;
 #endif
 
+#if CUSTOM_OPTIONS
+using Microsoft.Extensions.Logging.Configuration;
+#endif
+
 namespace Microsoft.Extensions.Logging
 {
     /// <summary>
@@ -79,9 +83,16 @@ namespace Microsoft.Extensions.Logging
             if (loggingBuilder == null) throw new ArgumentNullException(nameof(loggingBuilder));
             if (serverUrl == null) throw new ArgumentNullException(nameof(serverUrl));
 
-            var provider = CreateProvider(serverUrl, apiKey, LevelAlias.Minimum, null);
-
-            loggingBuilder.Services.AddSingleton<ILoggerProvider>(_ => provider);
+            loggingBuilder.Services.AddSingleton<ILoggerProvider>(s =>
+            {
+#if CUSTOM_OPTIONS
+                var opts = s.GetService<ILoggerProviderConfiguration<SerilogLoggerProvider>>();
+                var provider = CreateProvider(opts?.Configuration, serverUrl, apiKey);
+#else
+                var provider = CreateProvider(serverUrl, apiKey, LevelAlias.Minimum, null);
+#endif
+                return provider; 
+            });
 
             return loggingBuilder;
         }
@@ -151,6 +162,29 @@ namespace Microsoft.Extensions.Logging
             provider = CreateProvider(serverUrl, apiKey, minimumLevel, levelOverrides);
             return true;
         }
+
+#if CUSTOM_OPTIONS
+        static SerilogLoggerProvider CreateProvider(
+            IConfiguration configuration,
+            string defaultServerUrl,
+            string defaultApiKey)
+        {
+            string serverUrl = null, apiKey = null;
+            if (configuration != null)
+            {
+                serverUrl = configuration["ServerUrl"];
+                apiKey = configuration["ApiKey"];
+            }
+
+            if (string.IsNullOrWhiteSpace(serverUrl))
+                serverUrl = defaultServerUrl;
+
+            if (string.IsNullOrWhiteSpace(apiKey))
+                apiKey = defaultApiKey;
+
+            return CreateProvider(serverUrl, apiKey, LevelAlias.Minimum, null);
+        }
+#endif
 
         static SerilogLoggerProvider CreateProvider(
             string serverUrl,
