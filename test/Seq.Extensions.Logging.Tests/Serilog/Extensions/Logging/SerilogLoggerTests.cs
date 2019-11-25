@@ -42,7 +42,7 @@ namespace Tests.Serilog.Extensions.Logging
 
             logger.Log(LogLevel.Information, 0, TestMessage, null, null);
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace Tests.Serilog.Extensions.Logging
 
             logger.Log(LogLevel.Information, 0, "Test", exception, null);
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.Same(exception, sink.Writes[0].Exception);
         }
 
@@ -168,7 +168,7 @@ namespace Tests.Serilog.Extensions.Logging
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.True(sink.Writes[0].Properties.ContainsKey("Name"));
             Assert.Equal("\"pizza\"", sink.Writes[0].Properties["Name"].ToString());
         }
@@ -189,7 +189,7 @@ namespace Tests.Serilog.Extensions.Logging
             }
 
             // Should retain the property of the most specific scope
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.True(sink.Writes[0].Properties.ContainsKey("Name"));
             Assert.Equal("\"bacon\"", sink.Writes[0].Properties["Name"].ToString());
         }
@@ -209,7 +209,7 @@ namespace Tests.Serilog.Extensions.Logging
                 }
             }
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.True(sink.Writes[0].Properties.ContainsKey("Name"));
             Assert.Equal("\"spaghetti\"", sink.Writes[0].Properties["Name"].ToString());
             Assert.True(sink.Writes[0].Properties.ContainsKey("LuckyNumber"));
@@ -247,7 +247,7 @@ namespace Tests.Serilog.Extensions.Logging
 
             logger.Log(LogLevel.Information, expected, "Test", null, null);
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
 
             var eventId = (StructureValue) sink.Writes[0].Properties["EventId"];
             var id = (ScalarValue) eventId.Properties.Single(p => p.Name == "Id").Value;
@@ -266,7 +266,7 @@ namespace Tests.Serilog.Extensions.Logging
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.True(sink.Writes[0].Properties.ContainsKey("Person"));
 
             var person = (StructureValue)sink.Writes[0].Properties["Person"];
@@ -288,7 +288,7 @@ namespace Tests.Serilog.Extensions.Logging
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.True(sink.Writes[0].Properties.ContainsKey("Person"));
 
             var person = (StructureValue)sink.Writes[0].Properties["Person"];
@@ -310,7 +310,7 @@ namespace Tests.Serilog.Extensions.Logging
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.True(sink.Writes[0].Properties.ContainsKey("FirstName"));
         }
 
@@ -326,7 +326,7 @@ namespace Tests.Serilog.Extensions.Logging
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
             Assert.True(sink.Writes[0].Properties.ContainsKey("FirstName"));
         }
 
@@ -343,7 +343,7 @@ namespace Tests.Serilog.Extensions.Logging
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
 
-            Assert.Equal(1, sink.Writes.Count);
+            Assert.Single(sink.Writes);
 
             LogEventPropertyValue scopeValue;
             Assert.True(sink.Writes[0].Properties.TryGetValue(SerilogLoggerProvider.ScopePropertyName, out scopeValue));
