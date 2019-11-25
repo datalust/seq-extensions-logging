@@ -9,10 +9,6 @@ using Serilog.Sinks.Seq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Configuration;
 
-#if CUSTOM_OPTIONS
-using Microsoft.Extensions.Logging.Configuration;
-#endif
-
 namespace Microsoft.Extensions.Logging
 {
     /// <summary>
@@ -83,7 +79,6 @@ namespace Microsoft.Extensions.Logging
                 var opts = s.GetService<ILoggerProviderConfiguration<SerilogLoggerProvider>>();
                 var provider = CreateProvider(opts?.Configuration, serverUrl, apiKey);
                 return provider; 
-            });
             });
 
             return loggingBuilder;
@@ -173,29 +168,6 @@ namespace Microsoft.Extensions.Logging
 
             return CreateProvider(serverUrl, apiKey, LevelAlias.Minimum, null);
         }
-
-#if CUSTOM_OPTIONS
-        static SerilogLoggerProvider CreateProvider(
-            IConfiguration configuration,
-            string defaultServerUrl,
-            string defaultApiKey)
-        {
-            string serverUrl = null, apiKey = null;
-            if (configuration != null)
-            {
-                serverUrl = configuration["ServerUrl"];
-                apiKey = configuration["ApiKey"];
-            }
-
-            if (string.IsNullOrWhiteSpace(serverUrl))
-                serverUrl = defaultServerUrl;
-
-            if (string.IsNullOrWhiteSpace(apiKey))
-                apiKey = defaultApiKey;
-
-            return CreateProvider(serverUrl, apiKey, LevelAlias.Minimum, null);
-        }
-#endif
 
         static SerilogLoggerProvider CreateProvider(
             string serverUrl,
