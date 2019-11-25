@@ -25,10 +25,10 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-		// Added
+        // Added
         services.AddLogging(builder => builder.AddSeq())
 
-		// Other configuration follows...
+        // Other configuration follows...
     }
 }
 ```
@@ -96,8 +96,8 @@ In `appsettings.json` add a `"Seq"` property to `"Logging"` to configure the ser
       "Default": "Information"
     },
     "Seq": {
-	  "ServerUrl": "http://localhost:5341",
-	  "ApiKey": "1234567890",
+      "ServerUrl": "http://localhost:5341",
+      "ApiKey": "1234567890",
       "LogLevel": {
         "System": "Information",
         "Microsoft": "Warning"
