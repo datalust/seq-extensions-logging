@@ -26,10 +26,6 @@ namespace Serilog.Sinks.PeriodicBatching
         readonly Action<CancellationToken> _onTick;
         readonly CancellationTokenSource _cancel = new CancellationTokenSource();
 
-#if THREADING_TIMER
-        readonly Timer _timer;
-#endif
-
         bool _running;
         bool _disposed;
 
@@ -38,10 +34,6 @@ namespace Serilog.Sinks.PeriodicBatching
             if (onTick == null) throw new ArgumentNullException(nameof(onTick));
 
             _onTick = onTick;
-
-#if THREADING_TIMER
-            _timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
-#endif
         }
 
         public void Start(TimeSpan interval)
@@ -53,9 +45,6 @@ namespace Serilog.Sinks.PeriodicBatching
                 if (_disposed)
                     throw new ObjectDisposedException(nameof(PortableTimer));
 
-#if THREADING_TIMER
-                _timer.Change(interval, Timeout.InfiniteTimeSpan);
-#else
                 Task.Delay(interval, _cancel.Token)
                     .ContinueWith(
                         _ => OnTick(),
@@ -63,7 +52,6 @@ namespace Serilog.Sinks.PeriodicBatching
                         TaskContinuationOptions.DenyChildAttach,
                         TaskScheduler.Default)
                     .AsObserved();
-#endif
             }
         }
 
@@ -128,10 +116,6 @@ namespace Serilog.Sinks.PeriodicBatching
                 {
                     Monitor.Wait(_stateLock);
                 }
-
-#if THREADING_TIMER
-                _timer.Dispose();
-#endif
 
                 _disposed = true;
             }
