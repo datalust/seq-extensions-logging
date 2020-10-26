@@ -12,4 +12,4 @@ deploy:
     secure: 94298ksNMfJ2LkBV3Lw9o4JVzKvVPPMHF91p0XjsBhNWVeMX2NeROX4fpio6BsQy
   skip_symbols: true
   on:
-    branch: /^(master|dev)$/
+    branch: /^(main|dev)$/
