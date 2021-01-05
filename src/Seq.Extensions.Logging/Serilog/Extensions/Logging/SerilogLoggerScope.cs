@@ -1,48 +1,21 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace Serilog.Extensions.Logging
 {
-    class SerilogLoggerScope : IDisposable
+    readonly struct SerilogLoggerScope
     {
         const string NoName = "None";
 
-        readonly SerilogLoggerProvider _provider;
         readonly object _state;
 
-        // An optimization only, no problem if there are data races on this.
-        bool _disposed;
-
-        public SerilogLoggerScope(SerilogLoggerProvider provider, object state)
+        public SerilogLoggerScope(object state)
         {
-            _provider = provider;
             _state = state;
-
-            Parent = _provider.CurrentScope;
-            _provider.CurrentScope = this;
-        }
-
-        public SerilogLoggerScope Parent { get; }
-
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-
-                // In case one of the parent scopes has been disposed out-of-order, don't
-                // just blindly reinstate our own parent.
-                for (var scan = _provider.CurrentScope; scan != null; scan = scan.Parent)
-                {
-                    if (ReferenceEquals(scan, this))
-                        _provider.CurrentScope = Parent;
-                }
-            }
         }
 
         public void EnrichAndCreateScopeItem(LogEvent logEvent, ILogEventPropertyFactory propertyFactory, out LogEventPropertyValue scopeItem)
@@ -76,7 +49,7 @@ namespace Serilog.Extensions.Logging
                     }
 
                     var property = propertyFactory.CreateProperty(key, stateProperty.Value, destructureObject);
-                    logEvent.AddPropertyIfAbsent(property);
+                    logEvent.AddOrUpdateProperty(property);
                 }
             }
             else

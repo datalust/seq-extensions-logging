@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
@@ -15,13 +14,15 @@ namespace Serilog.Extensions.Logging
     /// An <see cref="ILoggerProvider"/> that pipes events through Serilog.
     /// </summary>
     [ProviderAlias("Seq")]
-    class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher
+    class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher, ISupportExternalScope
     {
         internal const string OriginalFormatPropertyName = "{OriginalFormat}";
         internal const string ScopePropertyName = "Scope";
 
         readonly Logger _logger;
         readonly Action _dispose;
+
+        IExternalScopeProvider _scopeProvider;
 
         /// <summary>
         /// Construct a <see cref="SerilogLoggerProvider"/>.
@@ -44,44 +45,42 @@ namespace Serilog.Extensions.Logging
 
         public IDisposable BeginScope<T>(T state)
         {
-            return new SerilogLoggerScope(this, state);
+            return _scopeProvider.Push(state);
         }
 
         /// <inheritdoc />
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            List<LogEventPropertyValue> scopeItems = null;
-            for (var scope = CurrentScope; scope != null; scope = scope.Parent)
+            List<LogEventPropertyValue> scopeItems = new List<LogEventPropertyValue>();
+
+            _scopeProvider?.ForEachScope((scopeState, state) =>
             {
+                var scope = new SerilogLoggerScope(scopeState);
+
                 LogEventPropertyValue scopeItem;
-                scope.EnrichAndCreateScopeItem(logEvent, propertyFactory, out scopeItem);
+                scope.EnrichAndCreateScopeItem(state.logEvent, state.propertyFactory, out scopeItem);
 
                 if (scopeItem != null)
                 {
-                    scopeItems = scopeItems ?? new List<LogEventPropertyValue>();
-                    scopeItems.Add(scopeItem);
+                    state.scopeItems.Add(scopeItem);
                 }
-            }
+            }, (logEvent, propertyFactory, scopeItems));
 
-            if (scopeItems != null)
+            if (scopeItems.Count > 0)
             {
-                scopeItems.Reverse();
                 logEvent.AddPropertyIfAbsent(new LogEventProperty(ScopePropertyName, new SequenceValue(scopeItems)));
             }
-        }
-
-        readonly AsyncLocal<SerilogLoggerScope> _value = new AsyncLocal<SerilogLoggerScope>();
-
-        internal SerilogLoggerScope CurrentScope
-        {
-            get => _value.Value;
-            set => _value.Value = value;
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
             _dispose();
+        }
+
+        public void SetScopeProvider(IExternalScopeProvider scopeProvider)
+        {
+            _scopeProvider = scopeProvider;
         }
     }
 }
