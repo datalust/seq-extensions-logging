@@ -45,7 +45,7 @@ namespace Serilog.Extensions.Logging
 
         public IDisposable BeginScope<T>(T state)
         {
-            return _scopeProvider.Push(state);
+            return _scopeProvider?.Push(state);
         }
 
         /// <inheritdoc />
