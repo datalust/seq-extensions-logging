@@ -51,15 +51,12 @@ namespace Serilog.Extensions.Logging
         /// <inheritdoc />
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            List<LogEventPropertyValue> scopeItems = new List<LogEventPropertyValue>();
+            var scopeItems = new List<LogEventPropertyValue>();
 
             _scopeProvider?.ForEachScope((scopeState, state) =>
             {
-                var scope = new SerilogLoggerScope(scopeState);
-
-                LogEventPropertyValue scopeItem;
-                scope.EnrichAndCreateScopeItem(state.logEvent, state.propertyFactory, out scopeItem);
-
+                SerilogLoggerScope.EnrichAndCreateScopeItem(scopeState, state.logEvent, state.propertyFactory, out var scopeItem);
+                
                 if (scopeItem != null)
                 {
                     state.scopeItems.Add(scopeItem);
