@@ -1,5 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Modifications Copyright (c) Datalust and Contributors
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Collections.Generic;
 using Serilog.Core;
@@ -7,27 +8,18 @@ using Serilog.Events;
 
 namespace Serilog.Extensions.Logging
 {
-    readonly struct SerilogLoggerScope
+    static class SerilogLoggerScope
     {
         const string NoName = "None";
-
-        readonly object _state;
-
-        public SerilogLoggerScope(object state)
+        
+        public static void EnrichAndCreateScopeItem(object state, LogEvent logEvent, ILogEventPropertyFactory propertyFactory, out LogEventPropertyValue scopeItem)
         {
-            _state = state;
-        }
-
-        public void EnrichAndCreateScopeItem(LogEvent logEvent, ILogEventPropertyFactory propertyFactory, out LogEventPropertyValue scopeItem)
-        {
-            if (_state == null)
+            if (state == null)
             {
                 scopeItem = null;
-                return;
             }
 
-            var stateProperties = _state as IEnumerable<KeyValuePair<string, object>>;
-            if (stateProperties != null)
+            if (state is IEnumerable<KeyValuePair<string, object>> stateProperties)
             {
                 scopeItem = null; // Unless it's `FormattedLogValues`, these are treated as property bags rather than scope items.
 
@@ -35,7 +27,7 @@ namespace Serilog.Extensions.Logging
                 {
                     if (stateProperty.Key == SerilogLoggerProvider.OriginalFormatPropertyName && stateProperty.Value is string)
                     {
-                        scopeItem = new ScalarValue(_state.ToString());
+                        scopeItem = new ScalarValue(state.ToString());
                         continue;
                     }
 
@@ -54,7 +46,7 @@ namespace Serilog.Extensions.Logging
             }
             else
             {
-                scopeItem = propertyFactory.CreateProperty(NoName, _state).Value;
+                scopeItem = propertyFactory.CreateProperty(NoName, state).Value;
             }
         }
     }
