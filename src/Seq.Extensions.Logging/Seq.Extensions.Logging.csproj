@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <Description>Add centralized structured log collection to ASP.NET Core apps with one line of code.</Description>
-    <VersionPrefix>5.0.1</VersionPrefix>
+    <VersionPrefix>5.0.0</VersionPrefix>
     <Authors>Datalust and Contributors</Authors>
-    <TargetFrameworks>net462;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net462;netstandard2.0;net5.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyOriginatorKeyFile>../../asset/seqext.snk</AssemblyOriginatorKeyFile>
@@ -14,6 +14,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/datalust/seq-extensions-logging</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RootNamespace/>
   </PropertyGroup>
 
   <ItemGroup>
