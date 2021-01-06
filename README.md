@@ -4,7 +4,7 @@
 
 For an example, see [the _dotnetconf_ deep dive session](https://channel9.msdn.com/Events/dotnetConf/2016/ASPNET-Core--deep-dive-on-building-a-real-website-with-todays-bits).
 
-![Screenshot](https://github.com/datalust/seq-extensions-logging/blob/master/asset/screenshot.png?raw=true)
+![Screenshot](https://raw.githubusercontent.com/datalust/seq-extensions-logging/dev/asset/screenshot.png)
 
 This package makes it a one-liner to configure ASP.NET Core logging with Seq.
 

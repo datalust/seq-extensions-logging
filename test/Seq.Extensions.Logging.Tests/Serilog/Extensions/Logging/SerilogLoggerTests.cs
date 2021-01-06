@@ -12,7 +12,6 @@ using Xunit;
 using Serilog.Extensions.Logging;
 using Seq.Extensions.Logging;
 using Tests.Serilog.Extensions.Logging.Support;
-using Serilog.Core.Enrichers;
 
 namespace Tests.Serilog.Extensions.Logging
 {
@@ -28,6 +27,7 @@ namespace Tests.Serilog.Extensions.Logging
             var l = new global::Serilog.Core.Logger(new global::Serilog.Core.LoggingLevelSwitch(logLevel), sink);
 
             var provider = new SerilogLoggerProvider(l);
+            provider.SetScopeProvider(new LoggerExternalScopeProvider());
             var logger = (SerilogLogger)provider.CreateLogger(Name);
 
             return new Tuple<SerilogLogger, SerilogSink>(logger, sink);

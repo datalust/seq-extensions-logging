@@ -1,60 +1,25 @@
 // Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Modifications Copyright (c) Datalust and Contributors
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace Serilog.Extensions.Logging
 {
-    class SerilogLoggerScope : IDisposable
+    static class SerilogLoggerScope
     {
         const string NoName = "None";
-
-        readonly SerilogLoggerProvider _provider;
-        readonly object _state;
-
-        // An optimization only, no problem if there are data races on this.
-        bool _disposed;
-
-        public SerilogLoggerScope(SerilogLoggerProvider provider, object state)
+        
+        public static void EnrichAndCreateScopeItem(object state, LogEvent logEvent, ILogEventPropertyFactory propertyFactory, out LogEventPropertyValue scopeItem)
         {
-            _provider = provider;
-            _state = state;
-
-            Parent = _provider.CurrentScope;
-            _provider.CurrentScope = this;
-        }
-
-        public SerilogLoggerScope Parent { get; }
-
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-
-                // In case one of the parent scopes has been disposed out-of-order, don't
-                // just blindly reinstate our own parent.
-                for (var scan = _provider.CurrentScope; scan != null; scan = scan.Parent)
-                {
-                    if (ReferenceEquals(scan, this))
-                        _provider.CurrentScope = Parent;
-                }
-            }
-        }
-
-        public void EnrichAndCreateScopeItem(LogEvent logEvent, ILogEventPropertyFactory propertyFactory, out LogEventPropertyValue scopeItem)
-        {
-            if (_state == null)
+            if (state == null)
             {
                 scopeItem = null;
-                return;
             }
 
-            var stateProperties = _state as IEnumerable<KeyValuePair<string, object>>;
-            if (stateProperties != null)
+            if (state is IEnumerable<KeyValuePair<string, object>> stateProperties)
             {
                 scopeItem = null; // Unless it's `FormattedLogValues`, these are treated as property bags rather than scope items.
 
@@ -62,7 +27,7 @@ namespace Serilog.Extensions.Logging
                 {
                     if (stateProperty.Key == SerilogLoggerProvider.OriginalFormatPropertyName && stateProperty.Value is string)
                     {
-                        scopeItem = new ScalarValue(_state.ToString());
+                        scopeItem = new ScalarValue(state.ToString());
                         continue;
                     }
 
@@ -76,12 +41,12 @@ namespace Serilog.Extensions.Logging
                     }
 
                     var property = propertyFactory.CreateProperty(key, stateProperty.Value, destructureObject);
-                    logEvent.AddPropertyIfAbsent(property);
+                    logEvent.AddOrUpdateProperty(property);
                 }
             }
             else
             {
-                scopeItem = propertyFactory.CreateProperty(NoName, _state).Value;
+                scopeItem = propertyFactory.CreateProperty(NoName, state).Value;
             }
         }
     }

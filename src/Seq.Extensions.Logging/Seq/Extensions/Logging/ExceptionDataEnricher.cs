@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Datalust
+﻿// Copyright 2016-2020 Datalust and Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,11 @@ namespace Seq.Extensions.Logging
     {
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            if (logEvent.Exception == null)
+            var exceptionData = logEvent.Exception?.GetBaseException().Data;
+            if (exceptionData == null || exceptionData.Count == 0)
                 return;
 
-            var exception = logEvent.Exception.GetBaseException();
-            
-            if (exception.Data == null || exception.Data.Count == 0)
-                return;
-
-            var data = exception.Data
+            var data = exceptionData
                 .Cast<DictionaryEntry>()
                 .Where(e => e.Key is string)
                 .Select(e => propertyFactory.CreateProperty((string)e.Key, e.Value));
