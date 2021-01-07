@@ -1,4 +1,4 @@
-﻿// Copyright 2013-2016 Serilog Contributors
+﻿// Copyright 2013-2020 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Seq.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Seq.Extensions.Logging;
 
 namespace Serilog.Sinks.PeriodicBatching
 {
@@ -23,17 +23,22 @@ namespace Serilog.Sinks.PeriodicBatching
     {
         readonly object _stateLock = new object();
 
-        readonly Action<CancellationToken> _onTick;
+        readonly Func<CancellationToken, Task> _onTick;
         readonly CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        readonly Timer _timer;
 
         bool _running;
         bool _disposed;
 
-        public PortableTimer(Action<CancellationToken> onTick)
+        public PortableTimer(Func<CancellationToken, Task> onTick)
         {
             if (onTick == null) throw new ArgumentNullException(nameof(onTick));
 
             _onTick = onTick;
+
+            using (ExecutionContext.SuppressFlow())
+                _timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
         }
 
         public void Start(TimeSpan interval)
@@ -45,17 +50,11 @@ namespace Serilog.Sinks.PeriodicBatching
                 if (_disposed)
                     throw new ObjectDisposedException(nameof(PortableTimer));
 
-                Task.Delay(interval, _cancel.Token)
-                    .ContinueWith(
-                        _ => OnTick(),
-                        CancellationToken.None,
-                        TaskContinuationOptions.DenyChildAttach,
-                        TaskScheduler.Default)
-                    .AsObserved();
+                _timer.Change(interval, Timeout.InfiniteTimeSpan);
             }
         }
 
-        private void OnTick()
+        async void OnTick()
         {
             try
             {
@@ -77,14 +76,14 @@ namespace Serilog.Sinks.PeriodicBatching
                         {
                             return;
                         }
-                    }                    
+                    }
 
                     _running = true;
                 }
 
                 if (!_cancel.Token.IsCancellationRequested)
                 {
-                    _onTick(_cancel.Token);
+                    await _onTick(_cancel.Token);
                 }
             }
             catch (OperationCanceledException tcx)
@@ -104,7 +103,7 @@ namespace Serilog.Sinks.PeriodicBatching
         public void Dispose()
         {
             _cancel.Cancel();
-            
+
             lock (_stateLock)
             {
                 if (_disposed)
@@ -117,16 +116,10 @@ namespace Serilog.Sinks.PeriodicBatching
                     Monitor.Wait(_stateLock);
                 }
 
+                _timer.Dispose();
+
                 _disposed = true;
             }
         }
-    }
-
-    static class TaskExtensions
-    {
-        public static async void AsObserved(this Task task)
-        {
-            await task.ConfigureAwait(false);
-        } 
     }
 }

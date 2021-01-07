@@ -1,4 +1,4 @@
-﻿// Serilog.Sinks.Seq Copyright 2016 Serilog Contributors
+﻿// Serilog.Sinks.Seq Copyright 2014-2019 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,142 +14,78 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Serilog.Core;
-using Seq.Extensions.Logging;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
-using Serilog.Formatting.Json;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Seq
 {
-    class SeqSink : PeriodicBatchingSink
+    class SeqSink : IBatchedLogEventSink, IDisposable
     {
+        public const int DefaultBatchPostingLimit = 1000;
+        public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(2);
+        public const int DefaultQueueSizeLimit = 100000;
+
+        static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
+
         readonly string _apiKey;
         readonly long? _eventBodyLimitBytes;
         readonly HttpClient _httpClient;
 
-        static readonly JsonValueFormatter JsonValueFormatter = new JsonValueFormatter();
-
-        readonly ControlledLevelSwitch _controlledSwitch;
-        static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
         DateTime _nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
-
-        public const int DefaultBatchPostingLimit = 1000;
-        public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(2);
+        readonly ControlledLevelSwitch _controlledSwitch;
 
         public SeqSink(
             string serverUrl,
             string apiKey,
-            int batchPostingLimit,
-            TimeSpan period,
             long? eventBodyLimitBytes,
-            LoggingLevelSwitch levelControlSwitch,
+            ControlledLevelSwitch controlledSwitch,
             HttpMessageHandler messageHandler)
-            : base(batchPostingLimit, period)
         {
             if (serverUrl == null) throw new ArgumentNullException(nameof(serverUrl));
+            _controlledSwitch = controlledSwitch ?? throw new ArgumentNullException(nameof(controlledSwitch));
             _apiKey = apiKey;
             _eventBodyLimitBytes = eventBodyLimitBytes;
-            _controlledSwitch = new ControlledLevelSwitch(levelControlSwitch);
             _httpClient = messageHandler != null ? new HttpClient(messageHandler) : new HttpClient();
             _httpClient.BaseAddress = new Uri(SeqApi.NormalizeServerBaseAddress(serverUrl));
         }
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            base.Dispose(disposing);
-
-            if (disposing)
-                _httpClient.Dispose();
+            _httpClient.Dispose();
         }
 
         // The sink must emit at least one event on startup, and the server be
         // configured to set a specific level, before background level checks will be performed.
-        protected override void OnEmptyBatch()
+        public async Task OnEmptyBatchAsync()
         {
             if (_controlledSwitch.IsActive &&
                 _nextRequiredLevelCheckUtc < DateTime.UtcNow)
             {
-                EmitBatch(Enumerable.Empty<LogEvent>());
+                await EmitBatchAsync(Enumerable.Empty<LogEvent>());
             }
         }
 
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+        public async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             _nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
 
-            var payload = FormatCompactPayload(events, _eventBodyLimitBytes);
+            var payloadContentType = SeqApi.CompactLogEventFormatMimeType;
+            var payload = SeqPayloadFormatter.FormatCompactPayload(events, _eventBodyLimitBytes);
 
-            var content = new StringContent(payload, Encoding.UTF8, SeqApi.CompactLogEventFormatMimeType);
+            var content = new StringContent(payload, Encoding.UTF8, payloadContentType);
             if (!string.IsNullOrWhiteSpace(_apiKey))
                 content.Headers.Add(SeqApi.ApiKeyHeaderName, _apiKey);
     
             var result = await _httpClient.PostAsync(SeqApi.BulkUploadResource, content).ConfigureAwait(false);
             if (!result.IsSuccessStatusCode)
-                throw new Exception($"Received failed result {result.StatusCode} when posting events to Seq");
+                throw new Exception($"Received failed result {result.StatusCode} when posting events to Seq.");
 
             var returned = await result.Content.ReadAsStringAsync();
             _controlledSwitch.Update(SeqApi.ReadEventInputResult(returned));
-        }
-
-        internal static string FormatCompactPayload(IEnumerable<LogEvent> events, long? eventBodyLimitBytes)
-        {
-            var payload = new StringWriter();
-
-            foreach (var logEvent in events)
-            {
-                var buffer = new StringWriter();
-
-                try
-                {
-                    CompactJsonFormatter.FormatEvent(logEvent, buffer, JsonValueFormatter);
-                }
-                catch (Exception ex)
-                {
-                    LogNonFormattableEvent(logEvent, ex);
-                    continue;
-                }
-
-                var json = buffer.ToString();
-                if (CheckEventBodySize(json, eventBodyLimitBytes))
-                {
-                    payload.WriteLine(json);
-                }
-            }
-
-            return payload.ToString();
-        }
-
-        protected override bool CanInclude(LogEvent evt)
-        {
-            return _controlledSwitch.IsIncluded(evt);
-        }
-
-        static bool CheckEventBodySize(string json, long? eventBodyLimitBytes)
-        {
-            if (eventBodyLimitBytes.HasValue &&
-                Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
-            {
-                SelfLog.WriteLine(
-                    "Event JSON representation exceeds the byte size limit of {0} set for this Seq sink and will be dropped; data: {1}",
-                    eventBodyLimitBytes, json);
-                return false;
-            }
-
-            return true;
-        }
-
-        static void LogNonFormattableEvent(LogEvent logEvent, Exception ex)
-        {
-            SelfLog.WriteLine(
-                "Event at {0} with message template {1} could not be formatted into JSON for Seq and will be dropped: {2}",
-                logEvent.Timestamp.ToString("o"), logEvent.MessageTemplate.Text, ex);
         }
     }
 }
