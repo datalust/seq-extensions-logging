@@ -48,7 +48,13 @@ namespace Serilog.Sinks.Seq
                 return null;
 
             var value = eventInputResult.Substring(startValue, endValue - startValue);
-            if (!Enum.TryParse(value, out LogLevel minimumLevel))
+            
+            LogLevel minimumLevel;
+            if (value == "Verbose")
+                minimumLevel = LogLevel.Trace;
+            else if (value == "Fatal")
+                minimumLevel = LogLevel.Critical;
+            else if (!Enum.TryParse(value, out minimumLevel))
                 return null;
 
             return minimumLevel;
