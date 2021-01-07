@@ -14,7 +14,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/datalust/seq-extensions-logging</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RootNamespace/>
+    <RootNamespace />
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,5 +26,4 @@
   <ItemGroup>
     <None Include="..\..\asset\icon.png" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
-
 </Project>

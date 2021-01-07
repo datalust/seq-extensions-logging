@@ -13,16 +13,14 @@
 // limitations under the License.
 
 using System;
-using Serilog.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Serilog.Sinks.Seq
 {
-    class SeqApi
+    static class SeqApi
     {
         public const string BulkUploadResource = "api/events/raw";
         public const string ApiKeyHeaderName = "X-Seq-ApiKey";
-        public const string RawEventFormatMimeType = "application/json";
         public const string CompactLogEventFormatMimeType = "application/vnd.serilog.clef";
 
         // Why not use a JSON parser here? For a very small case, it's not
@@ -35,8 +33,8 @@ namespace Serilog.Sinks.Seq
         {
             if (eventInputResult == null) return null;
 
-            // Seq 1.5 servers will return JSON including "MinimumLevelAccepted":x, where
-            // x may be null or a JSON string representation of the equivalent LogLevel
+            // Seq servers will return JSON including "MinimumLevelAccepted":x, where
+            // x may be null or a JSON string representation of the equivalent LogEventLevel
             var startProp = eventInputResult.IndexOf(LevelMarker, StringComparison.Ordinal);
             if (startProp == -1)
                 return null;
@@ -50,12 +48,7 @@ namespace Serilog.Sinks.Seq
                 return null;
 
             var value = eventInputResult.Substring(startValue, endValue - startValue);
-            LogLevel minimumLevel;
-            if (value == "Verbose")
-                minimumLevel = LogLevel.Trace;
-            else if (value == "Fatal")
-                minimumLevel = LogLevel.Critical;
-            else if (!Enum.TryParse(value, out minimumLevel))
+            if (!Enum.TryParse(value, out LogLevel minimumLevel))
                 return null;
 
             return minimumLevel;
