@@ -25,7 +25,7 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        // Added
+        // Added; requires `using Microsoft.Extensions.Logging;`
         services.AddLogging(builder => builder.AddSeq())
 
         // Other configuration follows...

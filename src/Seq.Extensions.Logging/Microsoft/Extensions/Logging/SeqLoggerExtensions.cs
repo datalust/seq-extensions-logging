@@ -8,6 +8,7 @@ using Serilog.Extensions.Logging;
 using Serilog.Sinks.Seq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Configuration;
+using Serilog.Sinks.PeriodicBatching;
 
 namespace Microsoft.Extensions.Logging
 {
@@ -180,10 +181,8 @@ namespace Microsoft.Extensions.Logging
             var sink = new SeqSink(
                 serverUrl,
                 apiKey,
-                1000,
-                TimeSpan.FromSeconds(2),
                 256 * 1024,
-                levelSwitch,
+                new ControlledLevelSwitch(levelSwitch),
                 null);
 
             LevelOverrideMap overrideMap = null;
@@ -198,7 +197,13 @@ namespace Microsoft.Extensions.Logging
                 overrideMap = new LevelOverrideMap(overrides, levelSwitch);
             }
 
-            var logger = new Logger(levelSwitch, sink, sink.Dispose, overrideMap);
+            var batchingSink = new PeriodicBatchingSink(sink, new PeriodicBatchingSinkOptions
+            {
+                BatchSizeLimit = 1000,
+                Period = TimeSpan.FromSeconds(2),
+            });
+            
+            var logger = new Logger(levelSwitch, batchingSink, batchingSink.Dispose, overrideMap);
             var provider = new SerilogLoggerProvider(logger);
             return provider;
         }
