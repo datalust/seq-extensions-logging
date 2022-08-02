@@ -32,7 +32,7 @@ namespace Serilog.Parameters
     // writing a log event (roughly) in control of the cost of recording that event.
     partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventPropertyValueFactory
     {
-        static readonly HashSet<Type> BuiltInScalarTypes = new HashSet<Type>
+        readonly HashSet<Type> _builtInScalarTypes = new()
         {
             typeof(bool),
             typeof(char),
@@ -41,6 +41,11 @@ namespace Serilog.Parameters
             typeof(string),
             typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan),
             typeof(Guid), typeof(Uri)
+        };
+
+        static IEnumerable<Type> SeqExtensionsLoggingScalarTypes() => new[]
+        {
+            typeof(JsonSafeString)
         };
 
         readonly IDestructuringPolicy[] _destructuringPolicies;
@@ -62,7 +67,7 @@ namespace Serilog.Parameters
 
             _scalarConversionPolicies = new IScalarConversionPolicy[]
             {
-                new SimpleScalarConversionPolicy(BuiltInScalarTypes),
+                new SimpleScalarConversionPolicy(_builtInScalarTypes.Concat(SeqExtensionsLoggingScalarTypes())),
                 new NullableScalarConversionPolicy(),
                 new EnumScalarConversionPolicy(),
                 new ByteArrayScalarConversionPolicy(),
@@ -220,7 +225,7 @@ namespace Serilog.Parameters
 
         bool IsValidDictionaryKeyType(Type valueType)
         {
-            return BuiltInScalarTypes.Contains(valueType) ||
+            return _builtInScalarTypes.Contains(valueType) ||
                    valueType.GetTypeInfo().IsEnum;
         }
 
@@ -247,14 +252,14 @@ namespace Serilog.Parameters
                     if (_propagateExceptions)
                         throw;
 
-                    propValue = "The property accessor threw an exception: " + ex.InnerException.GetType().Name;
+                    propValue = "The property accessor threw an exception: " + ex.InnerException?.GetType().Name;
                 }
                 yield return new LogEventProperty(prop.Name, recursive.CreatePropertyValue(propValue, true));
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsCompilerGeneratedType(Type type)
+        static bool IsCompilerGeneratedType(Type type)
         {
             var typeInfo = type.GetTypeInfo();
             var typeName = type.Name;
@@ -266,4 +271,3 @@ namespace Serilog.Parameters
         }
     }
 }
-

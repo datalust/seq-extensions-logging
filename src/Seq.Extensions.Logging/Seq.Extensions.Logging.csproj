@@ -14,10 +14,12 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/datalust/seq-extensions-logging</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <LangVersion>latest</LangVersion>
     <RootNamespace />
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />
