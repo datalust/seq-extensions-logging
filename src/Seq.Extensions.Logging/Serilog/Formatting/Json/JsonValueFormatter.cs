@@ -15,8 +15,10 @@
 using System;
 using System.Globalization;
 using System.IO;
+using Seq.Extensions.Logging;
 using Serilog.Data;
 using Serilog.Events;
+// ReSharper disable ForCanBeConvertedToForeach
 
 namespace Serilog.Formatting.Json
 {
@@ -152,7 +154,7 @@ namespace Serilog.Formatting.Json
         /// </summary>
         /// <param name="value">The value to write.</param>
         /// <param name="output">The output</param>
-        protected virtual void FormatLiteralValue(object value, TextWriter output)
+        static void FormatLiteralValue(object value, TextWriter output)
         {
             if (value == null)
             {
@@ -163,11 +165,10 @@ namespace Serilog.Formatting.Json
             // Although the linear switch-on-type has apparently worse algorithmic performance than the O(1)
             // dictionary lookup alternative, in practice, it's much to make a few equality comparisons
             // than the hash/bucket dictionary lookup, and since most data will be string (one comparison),
-            // numeric (a handful) or an object (two comparsions) the real-world performance of the code
+            // numeric (a handful) or an object (two comparisons) the real-world performance of the code
             // as written is as fast or faster.
 
-            var str = value as string;
-            if (str != null)
+            if (value is string str)
             {
                 FormatStringValue(str, output);
                 return;
@@ -175,28 +176,27 @@ namespace Serilog.Formatting.Json
 
             if (value is ValueType)
             {
-                if (value is int || value is uint || value is long || value is ulong || value is decimal ||
-                    value is byte || value is sbyte || value is short || value is ushort)
+                if (value is int or uint or long or ulong or decimal or byte or sbyte or short or ushort)
                 {
                     FormatExactNumericValue((IFormattable)value, output);
                     return;
                 }
 
-                if (value is double)
+                if (value is double d)
                 {
-                    FormatDoubleValue((double)value, output);
+                    FormatDoubleValue(d, output);
                     return;
                 }
 
-                if (value is float)
+                if (value is float f)
                 {
-                    FormatFloatValue((float)value, output);
+                    FormatFloatValue(f, output);
                     return;
                 }
 
-                if (value is bool)
+                if (value is bool b)
                 {
-                    FormatBooleanValue((bool)value, output);
+                    FormatBooleanValue(b, output);
                     return;
                 }
 
@@ -206,20 +206,31 @@ namespace Serilog.Formatting.Json
                     return;
                 }
 
-                if (value is DateTime || value is DateTimeOffset)
+                if (value is DateTime or DateTimeOffset)
                 {
                     FormatDateTimeValue((IFormattable)value, output);
                     return;
                 }
 
-                if (value is TimeSpan)
+                if (value is TimeSpan span)
                 {
-                    FormatTimeSpanValue((TimeSpan)value, output);
+                    FormatTimeSpanValue(span, output);
                     return;
                 }
             }
 
+            if (value is JsonSafeString jss)
+            {
+                FormatJsonSafeString(jss, output);
+                return;
+            }
+
             FormatLiteralObjectValue(value, output);
+        }
+
+        static void FormatJsonSafeString(JsonSafeString jss, TextWriter output)
+        {
+            output.Write(jss.ToString());
         }
 
         static void FormatBooleanValue(bool value, TextWriter output)

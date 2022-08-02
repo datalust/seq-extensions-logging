@@ -105,6 +105,15 @@ In `appsettings.json` add a `"Seq"` property to `"Logging"` to configure the ser
 The logging provider will dynamically adjust the default logging level up or down based on the level associated with an API key in Seq. For further information see 
 the [Seq documentation](http://docs.datalust.co/docs/using-serilog#dynamic-level-control).
 
+### Including literal JSON strings in log events
+
+The logging provider ships with a `JsonSafeString` type that can be used to communicate to the logger that a string contains valid JSON, which can be safely included in a log event as structured data.
+
+```csharp
+var json = "{\"A\": 42}";
+_logger.LogInformation("The answer is {Answer}", new JsonSafeString(json));
+```
+
 ### Troubleshooting
 
 > Nothing showed up, what can I do?
