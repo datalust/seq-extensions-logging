@@ -25,7 +25,7 @@ namespace Serilog.Sinks.Seq
 {
     static class SeqPayloadFormatter
     {
-        static readonly JsonValueFormatter JsonValueFormatter = new JsonValueFormatter("$type");
+        static readonly JsonValueFormatter JsonValueFormatter = new("$type");
         
         public static string FormatCompactPayload(IEnumerable<LogEvent> events, long? eventBodyLimitBytes)
         {

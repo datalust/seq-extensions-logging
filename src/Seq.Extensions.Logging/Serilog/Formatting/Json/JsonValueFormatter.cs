@@ -222,6 +222,7 @@ namespace Serilog.Formatting.Json
             if (value is JsonSafeString jss)
             {
                 FormatJsonSafeString(jss, output);
+                return;
             }
 
             FormatLiteralObjectValue(value, output);
