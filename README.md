@@ -10,7 +10,7 @@ This package makes it a one-liner to configure ASP.NET Core logging with Seq.
 
 ### Getting started
 
-The instructions that follow are for **.NET Core 2.0+**.
+The instructions that follow are for **.NET 6.0+** web applications.
 
 Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to your project either by editing the CSPROJ file, or using the NuGet package manager:
 
@@ -18,19 +18,12 @@ Add [the NuGet package](https://nuget.org/packages/seq.extensions.logging) to yo
 dotnet add package Seq.Extensions.Logging
 ```
 
-In `Startup.cs`, call `AddSeq()` on the provided `ILoggingBuilder`.
+In `Program.cs`, call `AddSeq()` on the host's `ILoggingBuilder`.
 
 ```csharp
-public class Startup
-{
-    public void ConfigureServices(IServiceCollection services)
-    {
-        // Added; requires `using Microsoft.Extensions.Logging;`
-        services.AddLogging(builder => builder.AddSeq())
-
-        // Other configuration follows...
-    }
-}
+// Use the Seq logging configuration in appsettings.json
+builder.Host.ConfigureLogging(loggingBuilder =>
+    loggingBuilder.AddSeq());
 ```
 
 The framework will inject `ILogger` instances into controllers and other classes:
@@ -54,7 +47,7 @@ class HomeController : Controller
 
 Log messages will be sent to Seq in batches and be visible in the Seq user interface. Observe that correlation identifiers added by the framework, like `RequestId`, are all exposed and fully-searchable in Seq.
 
-### Logging with message templates
+### Logging with message templates~~~~
 
 Seq supports the templated log messages used by _Microsoft.Extensions.Logging_. By writing events with _named format placeholders_, the data attached to the event preserves the individual property values.
 
@@ -109,7 +102,8 @@ In `appsettings.json` add a `"Seq"` property to `"Logging"` to configure the ser
 
 ### Dynamic log level control
 
-The logging provider will dynamically adjust the default logging level up or down based on the level associated with an API key in Seq. For further information see the [Seq documentation](http://docs.datalust.co/docs/using-serilog#dynamic-level-control).
+The logging provider will dynamically adjust the default logging level up or down based on the level associated with an API key in Seq. For further information see 
+the [Seq documentation](http://docs.datalust.co/docs/using-serilog#dynamic-level-control).
 
 ### Troubleshooting
 
@@ -149,7 +143,8 @@ Seq.Extensions.Logging.SelfLog.Enable(message => {
  
 ### Migrating to Serilog
 
-This package is based on a subset of the powerful [Serilog](https://serilog.net) library. Not all of the options supported by the Serilog and Seq client libraries are present in the _Seq.Extensions.Logging_ package. Migrating to the full Serilog API however is very easy:
+This package is based on a subset of the powerful [Serilog](https://serilog.net) library. Not all of the options supported by the Serilog and Seq client libraries are present in 
+the _Seq.Extensions.Logging_ package. Migrating to the full Serilog API however is very easy:
 
  1. Install packages _Serilog_, _Serilog.Extensions.Logging_ and _Serilog.Sinks.Seq_.
  2. Follow the instructions [here](https://github.com/serilog/serilog-extensions-logging) to change `AddSeq()` into `AddSerilog()` with a `LoggerConfiguration` object passed in
