@@ -35,20 +35,6 @@ namespace Serilog.Parsing
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="rawText">The token as it appears in the message template.</param>
-        /// <param name="formatObsolete">The format applied to the property, if any.</param>
-        /// <param name="destructuringObsolete">The destructuring strategy applied to the property, if any.</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        [Obsolete("Use named arguments with this method to guarantee forwards-compatibility."), EditorBrowsable(EditorBrowsableState.Never)]
-        public PropertyToken(string propertyName, string rawText, string formatObsolete, Destructuring destructuringObsolete)
-            : this(propertyName, rawText, formatObsolete, null, destructuringObsolete)
-        {
-        }
-
-        /// <summary>
-        /// Construct a <see cref="PropertyToken"/>.
-        /// </summary>
-        /// <param name="propertyName">The name of the property.</param>
-        /// <param name="rawText">The token as it appears in the message template.</param>
         /// <param name="format">The format applied to the property, if any.</param>
         /// <param name="alignment">The alignment applied to the property, if any.</param>
         /// <param name="destructuring">The destructuring strategy applied to the property, if any.</param>
@@ -57,16 +43,13 @@ namespace Serilog.Parsing
         public PropertyToken(string propertyName, string rawText, string format = null, Alignment? alignment = null, Destructuring destructuring = Destructuring.Default, int startIndex = -1)
             : base(startIndex)
         {
-            if (propertyName == null) throw new ArgumentNullException(nameof(propertyName));
-            if (rawText == null) throw new ArgumentNullException(nameof(rawText));
-            PropertyName = propertyName;
+            PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
             Format = format;
             Destructuring = destructuring;
-            _rawText = rawText;
+            _rawText = rawText ?? throw new ArgumentNullException(nameof(rawText));
             Alignment = alignment;
 
-            int position;
-            if (int.TryParse(PropertyName, NumberStyles.None, CultureInfo.InvariantCulture, out position) &&
+            if (int.TryParse(PropertyName, NumberStyles.None, CultureInfo.InvariantCulture, out var position) &&
                 position >= 0)
             {
                 _position = position;
@@ -89,8 +72,7 @@ namespace Serilog.Parsing
             if (properties == null) throw new ArgumentNullException(nameof(properties));
             if (output == null) throw new ArgumentNullException(nameof(output));
 
-            LogEventPropertyValue propertyValue;
-            if (!properties.TryGetValue(PropertyName, out propertyValue))
+            if (!properties.TryGetValue(PropertyName, out var propertyValue))
             {
                 output.Write(_rawText);
                 return;
@@ -166,12 +148,11 @@ namespace Serilog.Parsing
         /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
-            var pt = obj as PropertyToken;
-            return pt != null &&
-                pt.Destructuring == Destructuring &&
-                pt.Format == Format &&
-                pt.PropertyName == PropertyName &&
-                pt._rawText == _rawText;
+            return obj is PropertyToken pt &&
+                   pt.Destructuring == Destructuring &&
+                   pt.Format == Format &&
+                   pt.PropertyName == PropertyName &&
+                   pt._rawText == _rawText;
         }
 
         /// <summary>

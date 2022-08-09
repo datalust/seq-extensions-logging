@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29326.143
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -24,9 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seq.Extensions.Logging", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seq.Extensions.Logging.Tests", "test\Seq.Extensions.Logging.Tests\Seq.Extensions.Logging.Tests.csproj", "{64A3F2C5-D71E-44A6-8DC7-99474765B32E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication", "example\WebApplication\WebApplication.csproj", "{FC44EC1F-AD83-4522-99B4-4B309B8CC78A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebExample", "example\WebExample\WebExample.csproj", "{FC44EC1F-AD83-4522-99B4-4B309B8CC78A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication", "example\ConsoleApplication\ConsoleApplication.csproj", "{3C7C4F1B-7BB1-48F6-BC9E-0A81F632458B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleExample", "example\ConsoleExample\ConsoleExample.csproj", "{3C7C4F1B-7BB1-48F6-BC9E-0A81F632458B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
