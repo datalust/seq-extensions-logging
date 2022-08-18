@@ -47,7 +47,7 @@ class HomeController : Controller
 
 Log messages will be sent to Seq in batches and be visible in the Seq user interface. Observe that correlation identifiers added by the framework, like `RequestId`, are all exposed and fully-searchable in Seq.
 
-### Logging with message templates~~~~
+### Logging with message templates
 
 Seq supports the templated log messages used by _Microsoft.Extensions.Logging_. By writing events with _named format placeholders_, the data attached to the event preserves the individual property values.
 
