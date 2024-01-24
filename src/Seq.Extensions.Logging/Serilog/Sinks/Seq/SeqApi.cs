@@ -12,60 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Microsoft.Extensions.Logging;
 
-namespace Serilog.Sinks.Seq
+namespace Serilog.Sinks.Seq;
+
+static class SeqApi
 {
-    static class SeqApi
+    public const string BulkUploadResource = "api/events/raw";
+    public const string ApiKeyHeaderName = "X-Seq-ApiKey";
+    public const string CompactLogEventFormatMimeType = "application/vnd.serilog.clef";
+
+    // Why not use a JSON parser here? For a very small case, it's not
+    // worth taking on the extra payload/dependency management issues that
+    // a full-fledged parser will entail. If things get more sophisticated
+    // we'll reevaluate.
+    const string LevelMarker = "\"MinimumLevelAccepted\":\"";
+
+    public static LogLevel? ReadEventInputResult(string eventInputResult)
     {
-        public const string BulkUploadResource = "api/events/raw";
-        public const string ApiKeyHeaderName = "X-Seq-ApiKey";
-        public const string CompactLogEventFormatMimeType = "application/vnd.serilog.clef";
+        if (eventInputResult == null) return null;
 
-        // Why not use a JSON parser here? For a very small case, it's not
-        // worth taking on the extra payload/dependency management issues that
-        // a full-fledged parser will entail. If things get more sophisticated
-        // we'll reevaluate.
-        const string LevelMarker = "\"MinimumLevelAccepted\":\"";
+        // Seq servers will return JSON including "MinimumLevelAccepted":x, where
+        // x may be null or a JSON string representation of the equivalent LogEventLevel
+        var startProp = eventInputResult.IndexOf(LevelMarker, StringComparison.Ordinal);
+        if (startProp == -1)
+            return null;
 
-        public static LogLevel? ReadEventInputResult(string eventInputResult)
-        {
-            if (eventInputResult == null) return null;
+        var startValue = startProp + LevelMarker.Length;
+        if (startValue >= eventInputResult.Length)
+            return null;
 
-            // Seq servers will return JSON including "MinimumLevelAccepted":x, where
-            // x may be null or a JSON string representation of the equivalent LogEventLevel
-            var startProp = eventInputResult.IndexOf(LevelMarker, StringComparison.Ordinal);
-            if (startProp == -1)
-                return null;
+        var endValue = eventInputResult.IndexOf('"', startValue);
+        if (endValue == -1)
+            return null;
 
-            var startValue = startProp + LevelMarker.Length;
-            if (startValue >= eventInputResult.Length)
-                return null;
+        var value = eventInputResult.Substring(startValue, endValue - startValue);
 
-            var endValue = eventInputResult.IndexOf('"', startValue);
-            if (endValue == -1)
-                return null;
+        LogLevel minimumLevel;
+        if (value == "Verbose")
+            minimumLevel = LogLevel.Trace;
+        else if (value == "Fatal")
+            minimumLevel = LogLevel.Critical;
+        else if (!Enum.TryParse(value, out minimumLevel))
+            return null;
 
-            var value = eventInputResult.Substring(startValue, endValue - startValue);
-            
-            LogLevel minimumLevel;
-            if (value == "Verbose")
-                minimumLevel = LogLevel.Trace;
-            else if (value == "Fatal")
-                minimumLevel = LogLevel.Critical;
-            else if (!Enum.TryParse(value, out minimumLevel))
-                return null;
+        return minimumLevel;
+    }
 
-            return minimumLevel;
-        }
-
-        public static string NormalizeServerBaseAddress(string serverUrl)
-        {
-            var baseUri = serverUrl;
-            if (!baseUri.EndsWith("/"))
-                baseUri += "/";
-            return baseUri;
-        }
+    public static string NormalizeServerBaseAddress(string serverUrl)
+    {
+        var baseUri = serverUrl;
+        if (!baseUri.EndsWith("/"))
+            baseUri += "/";
+        return baseUri;
     }
 }

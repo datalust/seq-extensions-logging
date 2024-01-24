@@ -12,50 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+namespace Serilog.Events;
 
-namespace Serilog.Events
+/// <summary>
+/// A property associated with a <see cref="LogEvent"/>.
+/// </summary>
+class LogEventProperty
 {
     /// <summary>
-    /// A property associated with a <see cref="LogEvent"/>.
+    /// Construct a <see cref="LogEventProperty"/> with the specified name and value.
     /// </summary>
-    class LogEventProperty
+    /// <param name="name">The name of the property.</param>
+    /// <param name="value">The value of the property.</param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    public LogEventProperty(string name, LogEventPropertyValue value)
     {
-        /// <summary>
-        /// Construct a <see cref="LogEventProperty"/> with the specified name and value.
-        /// </summary>
-        /// <param name="name">The name of the property.</param>
-        /// <param name="value">The value of the property.</param>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="ArgumentNullException"></exception>
-        public LogEventProperty(string name, LogEventPropertyValue value)
-        {
-            if (value == null) throw new ArgumentNullException(nameof(value));
-            if (!IsValidName(name))
-                throw new ArgumentException("Property name is not valid.");
+        if (value == null) throw new ArgumentNullException(nameof(value));
+        if (!IsValidName(name))
+            throw new ArgumentException("Property name is not valid.");
 
-            Name = name;
-            Value = value;
-        }
+        Name = name;
+        Value = value;
+    }
 
-        /// <summary>
-        /// The name of the property.
-        /// </summary>
-        public string Name { get; }
+    /// <summary>
+    /// The name of the property.
+    /// </summary>
+    public string Name { get; }
 
-        /// <summary>
-        /// The value of the property.
-        /// </summary>
-        public LogEventPropertyValue Value { get; }
+    /// <summary>
+    /// The value of the property.
+    /// </summary>
+    public LogEventPropertyValue Value { get; }
 
-        /// <summary>
-        /// Test <paramref name="name" /> to determine if it is a valid property name.
-        /// </summary>
-        /// <param name="name">The name to check.</param>
-        /// <returns>True if the name is valid; otherwise, false.</returns>
-        public static bool IsValidName(string name)
-        {
-            return !string.IsNullOrWhiteSpace(name);
-        }
+    /// <summary>
+    /// Test <paramref name="name" /> to determine if it is a valid property name.
+    /// </summary>
+    /// <param name="name">The name to check.</param>
+    /// <returns>True if the name is valid; otherwise, false.</returns>
+    public static bool IsValidName(string name)
+    {
+        return !string.IsNullOrWhiteSpace(name);
     }
 }

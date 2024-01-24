@@ -12,28 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Serilog.Policies
+namespace Serilog.Policies;
+
+class NullableScalarConversionPolicy : IScalarConversionPolicy
 {
-    class NullableScalarConversionPolicy : IScalarConversionPolicy
+    public bool TryConvertToScalar(object value, ILogEventPropertyValueFactory propertyValueFactory, out ScalarValue result)
     {
-        public bool TryConvertToScalar(object value, ILogEventPropertyValueFactory propertyValueFactory, out ScalarValue result)
+        var type = value.GetType();
+        if (!type.IsConstructedGenericType || type.GetGenericTypeDefinition() != typeof(Nullable<>))
         {
-            var type = value.GetType();
-            if (!type.IsConstructedGenericType || type.GetGenericTypeDefinition() != typeof(Nullable<>))
-            {
-                result = null;
-                return false;
-            }
-
-            var targetType = type.GenericTypeArguments[0];
-
-            var innerValue = Convert.ChangeType(value, targetType);
-            result = propertyValueFactory.CreatePropertyValue(innerValue) as ScalarValue;
-            return result != null;
+            result = null;
+            return false;
         }
+
+        var targetType = type.GenericTypeArguments[0];
+
+        var innerValue = Convert.ChangeType(value, targetType);
+        result = propertyValueFactory.CreatePropertyValue(innerValue) as ScalarValue;
+        return result != null;
     }
 }

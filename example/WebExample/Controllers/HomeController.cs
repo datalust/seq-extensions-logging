@@ -25,7 +25,7 @@ public class HomeController : Controller
         {
             _logger.LogInformation("Events in this block have additional properties attached");
         }
-        
+
         return View();
     }
 

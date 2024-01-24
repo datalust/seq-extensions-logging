@@ -249,8 +249,8 @@ namespace Tests.Serilog.Extensions.Logging
 
             Assert.Single(sink.Writes);
 
-            var eventId = (StructureValue) sink.Writes[0].Properties["EventId"];
-            var id = (ScalarValue) eventId.Properties.Single(p => p.Name == "Id").Value;
+            var eventId = (StructureValue)sink.Writes[0].Properties["EventId"];
+            var id = (ScalarValue)eventId.Properties.Single(p => p.Name == "Id").Value;
             Assert.Equal(42, id.Value);
         }
 
@@ -282,8 +282,8 @@ namespace Tests.Serilog.Extensions.Logging
             var t = SetUp(LogLevel.Trace);
             var logger = t.Item1;
             var sink = t.Item2;
-            
-            using (logger.BeginScope(new Dictionary<string, object> {{ "@Person", new Person { FirstName = "John", LastName = "Smith" }}}))
+
+            using (logger.BeginScope(new Dictionary<string, object> { { "@Person", new Person { FirstName = "John", LastName = "Smith" } } }))
             {
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
@@ -321,7 +321,7 @@ namespace Tests.Serilog.Extensions.Logging
             var logger = t.Item1;
             var sink = t.Item2;
 
-            using (logger.BeginScope(new Dictionary<string, object> { { "FirstName", "John"}}))
+            using (logger.BeginScope(new Dictionary<string, object> { { "FirstName", "John" } }))
             {
                 logger.Log(LogLevel.Information, 0, TestMessage, null, null);
             }
