@@ -10,4 +10,8 @@
     <ProjectReference Include="..\..\src\Seq.Extensions.Logging\Seq.Extensions.Logging.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Properties\launchSettings.json" />
+  </ItemGroup>
+
 </Project>

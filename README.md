@@ -150,11 +150,13 @@ Seq.Extensions.Logging.SelfLog.Enable(message => {
  * Turn on the `SelfLog` as described above to check for connectivity problems and other issues on the client side.
  * [Raise an issue](https://github.com/datalust/seq-extensions-logging/issues), ask for help on the [Seq support forum](http://docs.datalust.co/discuss) or email **support@datalust.co**.
  
-### Migrating to Serilog
+### Versioning policy
+
+The major version of this package tracks the major version of its _Microsoft.Extensions.Logging_ dependency. So, if your
+application (on any target runtime) is targeting `net6.0`, use the latest 6.* version of this package. Likewise, if
+you're targeting `net8.0`, target a 8.* version of _Seq.Extensions.Logging_ for the best experience.
+
+### Credits
 
 This package is based on a subset of the powerful [Serilog](https://serilog.net) library. Not all of the options supported by the Serilog and Seq client libraries are present in 
-the _Seq.Extensions.Logging_ package. Migrating to the full Serilog API however is very easy:
-
- 1. Install packages _Serilog_, _Serilog.Extensions.Logging_ and _Serilog.Sinks.Seq_.
- 2. Follow the instructions [here](https://github.com/serilog/serilog-extensions-logging) to change `AddSeq()` into `AddSerilog()` with a `LoggerConfiguration` object passed in
- 3. Add `WriteTo.Seq()` to the Serilog configuration as per [the example](https://github.com/serilog/serilog-sinks-seq) given for the Seq sink for Serilog
+the _Seq.Extensions.Logging_ package.
