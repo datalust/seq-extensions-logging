@@ -14,7 +14,7 @@ namespace Seq.Extensions.Logging.Tests.Serilog.Sinks.Seq
             var payload = SeqPayloadFormatter.FormatCompactPayload(new[] { evt }, null);
             Assert.Contains("\"Answer\":{\"A\": 42}", payload);
         }
-        
+
         [Fact]
         public void DefaultJsonSafeStringsDoNotCorruptPayload()
         {

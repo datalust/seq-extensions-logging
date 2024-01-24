@@ -12,58 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+namespace Serilog.Events;
 
-namespace Serilog.Events
+/// <summary>
+/// A value represented as a mapping from keys to values.
+/// </summary>
+class DictionaryValue : LogEventPropertyValue
 {
     /// <summary>
-    /// A value represented as a mapping from keys to values.
+    /// Create a <see cref="DictionaryValue"/> with the provided <paramref name="elements"/>.
     /// </summary>
-    class DictionaryValue : LogEventPropertyValue
+    /// <param name="elements">The key-value mappings represented in the dictionary.</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public DictionaryValue(IEnumerable<KeyValuePair<ScalarValue, LogEventPropertyValue>> elements)
     {
-        /// <summary>
-        /// Create a <see cref="DictionaryValue"/> with the provided <paramref name="elements"/>.
-        /// </summary>
-        /// <param name="elements">The key-value mappings represented in the dictionary.</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public DictionaryValue(IEnumerable<KeyValuePair<ScalarValue, LogEventPropertyValue>> elements)
+        if (elements == null) throw new ArgumentNullException(nameof(elements));
+        Elements = elements.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+    }
+
+    /// <summary>
+    /// The dictionary mapping.
+    /// </summary>
+    public IReadOnlyDictionary<ScalarValue, LogEventPropertyValue> Elements { get; }
+
+    /// <summary>
+    /// Render the value to the output.
+    /// </summary>
+    /// <param name="output">The output.</param>
+    /// <param name="format">A format string applied to the value, or null.</param>
+    /// <param name="formatProvider">A format provider to apply to the value, or null to use the default.</param>
+    /// <seealso cref="LogEventPropertyValue.ToString(string, IFormatProvider)"/>.
+    public override void Render(TextWriter output, string format = null, IFormatProvider formatProvider = null)
+    {
+        if (output == null) throw new ArgumentNullException(nameof(output));
+
+        output.Write('[');
+        var delim = "(";
+        foreach (var kvp in Elements)
         {
-            if (elements == null) throw new ArgumentNullException(nameof(elements));
-            Elements = elements.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            output.Write(delim);
+            delim = ", (";
+            kvp.Key.Render(output, null, formatProvider);
+            output.Write(": ");
+            kvp.Value.Render(output, null, formatProvider);
+            output.Write(")");
         }
 
-        /// <summary>
-        /// The dictionary mapping.
-        /// </summary>
-        public IReadOnlyDictionary<ScalarValue, LogEventPropertyValue> Elements { get; }
-
-        /// <summary>
-        /// Render the value to the output.
-        /// </summary>
-        /// <param name="output">The output.</param>
-        /// <param name="format">A format string applied to the value, or null.</param>
-        /// <param name="formatProvider">A format provider to apply to the value, or null to use the default.</param>
-        /// <seealso cref="LogEventPropertyValue.ToString(string, IFormatProvider)"/>.
-        public override void Render(TextWriter output, string format = null, IFormatProvider formatProvider = null)
-        {
-            if (output == null) throw new ArgumentNullException(nameof(output));
-
-            output.Write('[');
-            var delim = "(";
-            foreach (var kvp in Elements)
-            {
-                output.Write(delim);
-                delim = ", (";
-                kvp.Key.Render(output, null, formatProvider);
-                output.Write(": ");
-                kvp.Value.Render(output, null, formatProvider);
-                output.Write(")");
-            }
-
-            output.Write(']');
-        }
+        output.Write(']');
     }
 }

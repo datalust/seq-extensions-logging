@@ -12,36 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Serilog.Events;
 using Seq.Extensions.Logging;
 
-namespace Serilog.Core.Enrichers
+namespace Serilog.Core.Enrichers;
+
+class SafeAggregateEnricher : ILogEventEnricher
 {
-    class SafeAggregateEnricher : ILogEventEnricher
+    readonly ILogEventEnricher[] _enrichers;
+
+    public SafeAggregateEnricher(IEnumerable<ILogEventEnricher> enrichers)
     {
-        readonly ILogEventEnricher[] _enrichers;
+        if (enrichers == null) throw new ArgumentNullException(nameof(enrichers));
+        _enrichers = enrichers.ToArray();
+    }
 
-        public SafeAggregateEnricher(IEnumerable<ILogEventEnricher> enrichers)
+    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    {
+        foreach (var enricher in _enrichers)
         {
-            if (enrichers == null) throw new ArgumentNullException(nameof(enrichers));
-            _enrichers = enrichers.ToArray();
-        }
-
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-        {
-            foreach (var enricher in _enrichers)
+            try
             {
-                try
-                {
-                    enricher.Enrich(logEvent, propertyFactory);
-                }
-                catch (Exception ex)
-                {
-                    SelfLog.WriteLine("Exception {0} caught while enriching {1} with {2}.", ex, logEvent, enricher);
-                }
+                enricher.Enrich(logEvent, propertyFactory);
+            }
+            catch (Exception ex)
+            {
+                SelfLog.WriteLine("Exception {0} caught while enriching {1} with {2}.", ex, logEvent, enricher);
             }
         }
     }

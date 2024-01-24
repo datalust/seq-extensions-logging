@@ -12,27 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Serilog.Events;
 
-namespace Serilog.Sinks.PeriodicBatching
+namespace Serilog.Sinks.PeriodicBatching;
+
+/// <summary>
+/// Interface for targets that accept events in batches.
+/// </summary>
+interface IBatchedLogEventSink
 {
     /// <summary>
-    /// Interface for targets that accept events in batches.
+    /// Emit a batch of log events, running asynchronously.
     /// </summary>
-    interface IBatchedLogEventSink
-    {
-        /// <summary>
-        /// Emit a batch of log events, running asynchronously.
-        /// </summary>
-        /// <param name="batch">The batch of events to emit.</param>
-        Task EmitBatchAsync(IEnumerable<LogEvent> batch);
+    /// <param name="batch">The batch of events to emit.</param>
+    Task EmitBatchAsync(IEnumerable<LogEvent> batch);
 
-        /// <summary>
-        /// Allows sinks to perform periodic work without requiring additional threads
-        /// or timers (thus avoiding additional flush/shut-down complexity).
-        /// </summary>
-        Task OnEmptyBatchAsync();
-    }
+    /// <summary>
+    /// Allows sinks to perform periodic work without requiring additional threads
+    /// or timers (thus avoiding additional flush/shut-down complexity).
+    /// </summary>
+    Task OnEmptyBatchAsync();
 }

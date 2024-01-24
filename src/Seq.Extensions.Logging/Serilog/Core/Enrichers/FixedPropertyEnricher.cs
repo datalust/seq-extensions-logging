@@ -12,25 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Serilog.Events;
 
-namespace Serilog.Core.Enrichers
+namespace Serilog.Core.Enrichers;
+
+class FixedPropertyEnricher : ILogEventEnricher
 {
-    class FixedPropertyEnricher : ILogEventEnricher
+    readonly LogEventProperty _logEventProperty;
+
+    public FixedPropertyEnricher(LogEventProperty logEventProperty)
     {
-        readonly LogEventProperty _logEventProperty;
+        if (logEventProperty == null) throw new ArgumentNullException(nameof(logEventProperty));
+        _logEventProperty = logEventProperty;
+    }
 
-        public FixedPropertyEnricher(LogEventProperty logEventProperty)
-        {
-            if (logEventProperty == null) throw new ArgumentNullException(nameof(logEventProperty));
-            _logEventProperty = logEventProperty;
-        }
-
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-        {
-            if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-            logEvent.AddPropertyIfAbsent(_logEventProperty);
-        }
+    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    {
+        if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+        logEvent.AddPropertyIfAbsent(_logEventProperty);
     }
 }
