@@ -114,6 +114,18 @@ var json = "{\"A\": 42}";
 _logger.LogInformation("The answer is {Answer}", new JsonSafeString(json));
 ```
 
+### Trace and span correlation
+
+The Seq logger provider automatically adds trace and span ids to events when present, enabling the _Trace_ drop-down menu in Seq's expanded event view.
+
+ASP.NET Core may add additional top-level `TraceId`, `SpanId`, and `ParentId` properties in its default configuration. You can remove these if you wish, using `ILoggingBuilder.Configure()`:
+
+```csharp
+builder.Logging.Configure(opts => {
+    opts.ActivityTrackingOptions = ActivityTrackingOptions.None;
+});
+```
+
 ### Troubleshooting
 
 > Nothing showed up, what can I do?

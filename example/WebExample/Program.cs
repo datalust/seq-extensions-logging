@@ -6,6 +6,10 @@ builder.Services.AddControllersWithViews();
 // Use the Seq logging configuration in appsettings.json
 builder.Logging.AddSeq();
 
+// Don't log redundant top-level `TraceId` and `SpanId` properties, these are handled implicitly
+// by the Seq logger.
+builder.Logging.Configure(opts => opts.ActivityTrackingOptions = ActivityTrackingOptions.None);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
