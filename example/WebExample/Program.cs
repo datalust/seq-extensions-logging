@@ -4,8 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Use the Seq logging configuration in appsettings.json
-builder.Host.ConfigureLogging(loggingBuilder =>
-    loggingBuilder.AddSeq());
+builder.Logging.AddSeq();
 
 var app = builder.Build();
 

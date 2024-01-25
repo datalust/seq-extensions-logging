@@ -37,9 +37,9 @@ class LogEvent
     /// <param name="traceId">The id of the trace that was active when the event was created, if any.</param>
     /// <param name="spanId">The id of the span that was active when the event was created, if any.</param>
     public LogEvent(
-        DateTimeOffset timestamp, 
-        LogLevel level, 
-        Exception exception, 
+        DateTimeOffset timestamp,
+        LogLevel level,
+        Exception exception,
         MessageTemplate messageTemplate,
         IEnumerable<LogEventProperty> properties,
         ActivityTraceId traceId,
@@ -70,13 +70,11 @@ class LogEvent
     /// <summary>
     /// The id of the trace that was active when the event was created, if any.
     /// </summary>
-    [CLSCompliant(false)]
     public ActivityTraceId? TraceId => _traceId == default ? null : _traceId;
 
     /// <summary>
     /// The id of the span that was active when the event was created, if any.
     /// </summary>
-    [CLSCompliant(false)]
     public ActivitySpanId? SpanId => _spanId == default ? null : _spanId;
 
     /// <summary>

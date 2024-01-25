@@ -44,7 +44,7 @@ class SerilogLogger : FrameworkLogger
         return _logger.IsEnabled(logLevel);
     }
 
-    public IDisposable? BeginScope<TState>(TState state) where TState: notnull
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
     {
         return _provider.BeginScope(state);
     }
