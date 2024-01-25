@@ -17,10 +17,10 @@ namespace Tests.Serilog.Extensions.Logging
 {
     public class SerilogLoggerTest
     {
-        private const string Name = "test";
-        private const string TestMessage = "This is a test";
+        const string Name = "test";
+        const string TestMessage = "This is a test";
 
-        private Tuple<SerilogLogger, SerilogSink> SetUp(LogLevel logLevel)
+        Tuple<SerilogLogger, SerilogSink> SetUp(LogLevel logLevel)
         {
             var sink = new SerilogSink();
 
@@ -52,12 +52,12 @@ namespace Tests.Serilog.Extensions.Logging
             var logger = t.Item1;
             var sink = t.Item2;
 
-            logger.Log(LogLevel.Trace, 0, TestMessage, null, null);
-            logger.Log(LogLevel.Debug, 0, TestMessage, null, null);
-            logger.Log(LogLevel.Information, 0, TestMessage, null, null);
-            logger.Log(LogLevel.Warning, 0, TestMessage, null, null);
-            logger.Log(LogLevel.Error, 0, TestMessage, null, null);
-            logger.Log(LogLevel.Critical, 0, TestMessage, null, null);
+            logger.Log(LogLevel.Trace, 0, TestMessage, null, null!);
+            logger.Log(LogLevel.Debug, 0, TestMessage, null, null!);
+            logger.Log(LogLevel.Information, 0, TestMessage, null, null!);
+            logger.Log(LogLevel.Warning, 0, TestMessage, null, null!);
+            logger.Log(LogLevel.Error, 0, TestMessage, null, null!);
+            logger.Log(LogLevel.Critical, 0, TestMessage, null, null!);
 
             Assert.Equal(6, sink.Writes.Count);
             Assert.Equal(LogLevel.Trace, sink.Writes[0].Level);
@@ -111,7 +111,7 @@ namespace Tests.Serilog.Extensions.Logging
             var logger = t.Item1;
             var sink = t.Item2;
 
-            logger.Log(logLevel, 0, TestMessage, null, null);
+            logger.Log(logLevel, 0, TestMessage, null, null!);
 
             Assert.Equal(expected, sink.Writes.Count);
         }
@@ -354,7 +354,7 @@ namespace Tests.Serilog.Extensions.Logging
             Assert.Equal("Inner", items[1]);
         }
 
-        private class FoodScope : IEnumerable<KeyValuePair<string, object>>
+        class FoodScope : IEnumerable<KeyValuePair<string, object>>
         {
             readonly string _name;
 
@@ -374,7 +374,7 @@ namespace Tests.Serilog.Extensions.Logging
             }
         }
 
-        private class LuckyScope : IEnumerable<KeyValuePair<string, object>>
+        class LuckyScope : IEnumerable<KeyValuePair<string, object>>
         {
             readonly int _luckyNumber;
 
@@ -394,7 +394,7 @@ namespace Tests.Serilog.Extensions.Logging
             }
         }
 
-        private class Person
+        class Person
         {
             public string FirstName { get; set; }
             public string LastName { get; set; }

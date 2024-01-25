@@ -9,6 +9,11 @@ using FrameworkLogger = Microsoft.Extensions.Logging.ILogger;
 using System.Reflection;
 using Serilog.Parsing;
 
+#nullable enable
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+// ReSharper disable ConstantNullCoalescingCondition
+
 namespace Serilog.Extensions.Logging;
 
 class SerilogLogger : FrameworkLogger
@@ -21,7 +26,7 @@ class SerilogLogger : FrameworkLogger
     public SerilogLogger(
         SerilogLoggerProvider provider,
         Logger logger,
-        string name = null)
+        string? name = null)
     {
         if (logger == null) throw new ArgumentNullException(nameof(logger));
         _provider = provider ?? throw new ArgumentNullException(nameof(provider));
@@ -39,12 +44,12 @@ class SerilogLogger : FrameworkLogger
         return _logger.IsEnabled(logLevel);
     }
 
-    public IDisposable BeginScope<TState>(TState state)
+    public IDisposable? BeginScope<TState>(TState state) where TState: notnull
     {
         return _provider.BeginScope(state);
     }
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         if (!_logger.IsEnabled(logLevel))
         {
@@ -52,7 +57,7 @@ class SerilogLogger : FrameworkLogger
         }
 
         var logger = _logger;
-        string messageTemplate = null;
+        string? messageTemplate = null;
 
         var properties = new List<LogEventProperty>();
 
@@ -89,23 +94,21 @@ class SerilogLogger : FrameworkLogger
 
         if (messageTemplate == null)
         {
-            string propertyName = null;
+            string? propertyName = null;
             if (state != null)
             {
                 propertyName = "State";
                 messageTemplate = "{State:l}";
             }
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             else if (formatter != null)
             {
                 propertyName = "Message";
                 messageTemplate = "{Message:l}";
             }
 
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (propertyName != null)
             {
-                if (logger.BindProperty(propertyName, AsLoggableValue(state, formatter), false, out var property))
+                if (logger.BindProperty(propertyName, AsLoggableValue(state, formatter!), false, out var property))
                     properties.Add(property);
             }
         }
@@ -113,16 +116,15 @@ class SerilogLogger : FrameworkLogger
         if (eventId.Id != 0 || eventId.Name != null)
             properties.Add(CreateEventIdProperty(eventId));
 
-        // ReSharper disable once ConstantNullCoalescingCondition
         var parsedTemplate = MessageTemplateParser.Parse(messageTemplate ?? "");
         var currentActivity = Activity.Current;
         var evt = new LogEvent(DateTimeOffset.Now, logLevel, exception, parsedTemplate, properties, currentActivity?.TraceId ?? default, currentActivity?.SpanId ?? default);
         logger.Write(evt);
     }
 
-    static object AsLoggableValue<TState>(TState state, Func<TState, Exception, string> formatter)
+    static object? AsLoggableValue<TState>(TState state, Func<TState, Exception?, string> formatter)
     {
-        object stateObject = state;
+        object? stateObject = state;
         if (formatter != null)
             stateObject = formatter(state, null);
         return stateObject;
