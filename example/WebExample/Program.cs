@@ -4,8 +4,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Use the Seq logging configuration in appsettings.json
-builder.Host.ConfigureLogging(loggingBuilder =>
-    loggingBuilder.AddSeq());
+builder.Logging.AddSeq();
+
+// Don't log redundant top-level `TraceId` and `SpanId` properties, these are handled implicitly
+// by the Seq logger.
+builder.Logging.Configure(opts => opts.ActivityTrackingOptions = ActivityTrackingOptions.None);
 
 var app = builder.Build();
 

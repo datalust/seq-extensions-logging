@@ -4,16 +4,17 @@
 using System.Collections.Generic;
 using Serilog.Core;
 using Serilog.Events;
+using Xunit;
 
-namespace Tests.Serilog.Extensions.Logging.Support
+namespace Tests.Serilog.Extensions.Logging.Support;
+
+class SerilogSink : ILogEventSink
 {
-    class SerilogSink : ILogEventSink
-    {
-        public List<LogEvent> Writes { get; set; } = new List<LogEvent>();
+    public List<LogEvent> Writes { get; } = [];
+    public LogEvent SingleWrite => Assert.Single(Writes);
 
-        public void Emit(LogEvent logEvent)
-        {
-            Writes.Add(logEvent);
-        }
+    public void Emit(LogEvent logEvent)
+    {
+        Writes.Add(logEvent);
     }
 }

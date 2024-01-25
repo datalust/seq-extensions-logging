@@ -28,9 +28,4 @@ static class LevelAlias
     /// The least significant level of event.
     /// </summary>
     public const LogLevel Minimum = LogLevel.Trace;
-
-    /// <summary>
-    /// The most significant level of event.
-    /// </summary>
-    public const LogLevel Maximum = LogLevel.Critical;
 }

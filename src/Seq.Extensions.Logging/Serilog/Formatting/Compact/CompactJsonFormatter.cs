@@ -16,6 +16,7 @@ using Serilog.Events;
 using Serilog.Formatting.Json;
 using Serilog.Parsing;
 using Microsoft.Extensions.Logging;
+// ReSharper disable PossibleMultipleEnumeration
 
 namespace Serilog.Formatting.Compact;
 
@@ -70,6 +71,20 @@ static class CompactJsonFormatter
         {
             output.Write(",\"@x\":");
             JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
+        }
+
+        if (logEvent.TraceId != null)
+        {
+            output.Write(",\"@tr\":\"");
+            output.Write(logEvent.TraceId.Value.ToHexString());
+            output.Write('\"');
+        }
+
+        if (logEvent.SpanId != null)
+        {
+            output.Write(",\"@sp\":\"");
+            output.Write(logEvent.SpanId.Value.ToHexString());
+            output.Write('\"');
         }
 
         foreach (var property in logEvent.Properties)

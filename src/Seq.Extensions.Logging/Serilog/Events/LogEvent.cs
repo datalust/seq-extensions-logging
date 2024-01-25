@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace Serilog.Events;
@@ -22,6 +23,8 @@ namespace Serilog.Events;
 class LogEvent
 {
     readonly Dictionary<string, LogEventPropertyValue> _properties;
+    ActivityTraceId _traceId;
+    ActivitySpanId _spanId;
 
     /// <summary>
     /// Construct a new <seealso cref="LogEvent"/>.
@@ -31,14 +34,24 @@ class LogEvent
     /// <param name="exception">An exception associated with the event, or null.</param>
     /// <param name="messageTemplate">The message template describing the event.</param>
     /// <param name="properties">Properties associated with the event, including those presented in <paramref name="messageTemplate"/>.</param>
-    public LogEvent(DateTimeOffset timestamp, LogLevel level, Exception exception, MessageTemplate messageTemplate, IEnumerable<LogEventProperty> properties)
+    /// <param name="traceId">The id of the trace that was active when the event was created, if any.</param>
+    /// <param name="spanId">The id of the span that was active when the event was created, if any.</param>
+    public LogEvent(
+        DateTimeOffset timestamp,
+        LogLevel level,
+        Exception exception,
+        MessageTemplate messageTemplate,
+        IEnumerable<LogEventProperty> properties,
+        ActivityTraceId traceId,
+        ActivitySpanId spanId)
     {
-        if (messageTemplate == null) throw new ArgumentNullException(nameof(messageTemplate));
         if (properties == null) throw new ArgumentNullException(nameof(properties));
+        _traceId = traceId;
+        _spanId = spanId;
         Timestamp = timestamp;
         Level = level;
         Exception = exception;
-        MessageTemplate = messageTemplate;
+        MessageTemplate = messageTemplate ?? throw new ArgumentNullException(nameof(messageTemplate));
         _properties = new Dictionary<string, LogEventPropertyValue>();
         foreach (var p in properties)
             AddOrUpdateProperty(p);
@@ -53,6 +66,16 @@ class LogEvent
     /// The level of the event.
     /// </summary>
     public LogLevel Level { get; }
+
+    /// <summary>
+    /// The id of the trace that was active when the event was created, if any.
+    /// </summary>
+    public ActivityTraceId? TraceId => _traceId == default ? null : _traceId;
+
+    /// <summary>
+    /// The id of the span that was active when the event was created, if any.
+    /// </summary>
+    public ActivitySpanId? SpanId => _spanId == default ? null : _spanId;
 
     /// <summary>
     /// The message template describing the event.
