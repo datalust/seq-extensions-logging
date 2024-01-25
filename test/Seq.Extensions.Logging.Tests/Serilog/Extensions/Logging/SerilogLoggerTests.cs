@@ -40,7 +40,7 @@ namespace Tests.Serilog.Extensions.Logging
             var logger = t.Item1;
             var sink = t.Item2;
 
-            logger.Log(LogLevel.Information, 0, TestMessage, null, null);
+            logger.Log(LogLevel.Information, 0, TestMessage, null, null!);
 
             Assert.Single(sink.Writes);
         }

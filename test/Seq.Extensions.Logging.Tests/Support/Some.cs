@@ -36,7 +36,7 @@ namespace Tests.Support
             {
                 throw new XunitException("Template could not be bound.");
             }
-            return new LogEvent(DateTimeOffset.Now, level, exception, template, properties);
+            return new LogEvent(DateTimeOffset.Now, level, exception, template, properties, default, default);
         }
 
         public static LogEvent DebugEvent()
