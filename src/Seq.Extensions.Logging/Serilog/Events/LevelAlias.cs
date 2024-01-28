@@ -14,24 +14,18 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Serilog.Events
+namespace Serilog.Events;
+
+/// <summary>
+/// Descriptive aliases for <see cref="LogLevel"/>.
+/// </summary>
+/// <remarks>These do not appear as members of the enumeration
+/// as duplicated underlying values result in issues when presenting
+/// enum values with <see cref="object.ToString()"/>.</remarks>
+static class LevelAlias
 {
     /// <summary>
-    /// Descriptive aliases for <see cref="LogLevel"/>.
+    /// The least significant level of event.
     /// </summary>
-    /// <remarks>These do not appear as members of the enumeration
-    /// as duplicated underlying values result in issues when presenting
-    /// enum values with <see cref="object.ToString()"/>.</remarks>
-    static class LevelAlias
-    {
-        /// <summary>
-        /// The least significant level of event.
-        /// </summary>
-        public const LogLevel Minimum = LogLevel.Trace;
-
-        /// <summary>
-        /// The most significant level of event.
-        /// </summary>
-        public const LogLevel Maximum = LogLevel.Critical;
-    }
+    public const LogLevel Minimum = LogLevel.Trace;
 }

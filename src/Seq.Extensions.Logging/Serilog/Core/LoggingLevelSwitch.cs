@@ -14,35 +14,34 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Serilog.Core
+namespace Serilog.Core;
+
+/// <summary>
+/// Dynamically controls logging level.
+/// </summary>
+class LoggingLevelSwitch
 {
+    volatile LogLevel _minimumLevel;
+
     /// <summary>
-    /// Dynamically controls logging level.
+    /// Create a <see cref="LoggingLevelSwitch"/> at the initial
+    /// minimum level.
     /// </summary>
-    class LoggingLevelSwitch
+    /// <param name="initialMinimumLevel">The initial level to which the switch is set.</param>
+    public LoggingLevelSwitch(LogLevel initialMinimumLevel = LogLevel.Information)
     {
-        volatile LogLevel _minimumLevel;
+        _minimumLevel = initialMinimumLevel;
+    }
 
-        /// <summary>
-        /// Create a <see cref="LoggingLevelSwitch"/> at the initial
-        /// minimum level.
-        /// </summary>
-        /// <param name="initialMinimumLevel">The initial level to which the switch is set.</param>
-        public LoggingLevelSwitch(LogLevel initialMinimumLevel = LogLevel.Information)
-        {
-            _minimumLevel = initialMinimumLevel;
-        }
-
-        /// <summary>
-        /// The current minimum level, below which no events
-        /// should be generated.
-        /// </summary>
-        // Reading this property generates a memory barrier,
-        // so needs to be used judiciously in the logging pipeline.
-        public LogLevel MinimumLevel
-        {
-            get { return _minimumLevel; }
-            set { _minimumLevel = value; }
-        }
+    /// <summary>
+    /// The current minimum level, below which no events
+    /// should be generated.
+    /// </summary>
+    // Reading this property generates a memory barrier,
+    // so needs to be used judiciously in the logging pipeline.
+    public LogLevel MinimumLevel
+    {
+        get { return _minimumLevel; }
+        set { _minimumLevel = value; }
     }
 }

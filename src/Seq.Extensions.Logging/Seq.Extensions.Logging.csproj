@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <Description>Add centralized structured log collection to ASP.NET Core apps with one line of code.</Description>
-    <VersionPrefix>6.1.1</VersionPrefix>
+    <VersionPrefix>8.0.0</VersionPrefix>
     <Authors>Datalust and Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyOriginatorKeyFile>../../asset/seqext.snk</AssemblyOriginatorKeyFile>
@@ -16,31 +16,19 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <LangVersion>latest</LangVersion>
     <RootNamespace />
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="All" />
-  </ItemGroup>
-    
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1' ">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.22" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.22" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.1.22" />
-  </ItemGroup>
-	
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />
-  </ItemGroup>	
-	
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="8.0.0" />
   </ItemGroup>
 	
   <ItemGroup>
     <None Include="..\..\asset\icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
 </Project>

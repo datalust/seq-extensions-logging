@@ -6,7 +6,7 @@ namespace WebExample.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    readonly ILogger<HomeController> _logger;
 
     public HomeController(ILogger<HomeController> logger)
     {
@@ -25,7 +25,7 @@ public class HomeController : Controller
         {
             _logger.LogInformation("Events in this block have additional properties attached");
         }
-        
+
         return View();
     }
 

@@ -12,50 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Serilog.Events;
 
-namespace Serilog.Core.Enrichers
+namespace Serilog.Core.Enrichers;
+
+/// <summary>
+/// Adds a new property encricher to the log event.
+/// </summary>
+class PropertyEnricher : ILogEventEnricher
 {
+    readonly string _name;
+    readonly object _value;
+    readonly bool _destructureObjects;
+
     /// <summary>
-    /// Adds a new property encricher to the log event.
+    /// Create a new property enricher.
     /// </summary>
-    class PropertyEnricher : ILogEventEnricher
+    /// <param name="name">The name of the property.</param>
+    /// <param name="value">The value of the property.</param>
+    /// <returns>A handle to later remove the property from the context.</returns>
+    /// <param name="destructureObjects">If true, and the value is a non-primitive, non-array type,
+    /// then the value will be converted to a structure; otherwise, unknown types will
+    /// be converted to scalars, which are generally stored as strings.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public PropertyEnricher(string name, object value, bool destructureObjects = false)
     {
-        readonly string _name;
-        readonly object _value;
-        readonly bool _destructureObjects;
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Property name must not be null or empty.", nameof(name));
+        _name = name;
+        _value = value;
+        _destructureObjects = destructureObjects;
+    }
 
-        /// <summary>
-        /// Create a new property enricher.
-        /// </summary>
-        /// <param name="name">The name of the property.</param>
-        /// <param name="value">The value of the property.</param>
-        /// <returns>A handle to later remove the property from the context.</returns>
-        /// <param name="destructureObjects">If true, and the value is a non-primitive, non-array type,
-        /// then the value will be converted to a structure; otherwise, unknown types will
-        /// be converted to scalars, which are generally stored as strings.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public PropertyEnricher(string name, object value, bool destructureObjects = false)
-        {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Property name must not be null or empty.", nameof(name));
-            _name = name;
-            _value = value;
-            _destructureObjects = destructureObjects;
-        }
-
-        /// <summary>
-        /// Enrich the log event.
-        /// </summary>
-        /// <param name="logEvent">The log event to enrich.</param>
-        /// <param name="propertyFactory">Factory for creating new properties to add to the event.</param>
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-        {
-            if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-            if (propertyFactory == null) throw new ArgumentNullException(nameof(propertyFactory));
-            var property = propertyFactory.CreateProperty(_name, _value, _destructureObjects);
-            logEvent.AddPropertyIfAbsent(property);
-        }
+    /// <summary>
+    /// Enrich the log event.
+    /// </summary>
+    /// <param name="logEvent">The log event to enrich.</param>
+    /// <param name="propertyFactory">Factory for creating new properties to add to the event.</param>
+    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    {
+        if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+        if (propertyFactory == null) throw new ArgumentNullException(nameof(propertyFactory));
+        var property = propertyFactory.CreateProperty(_name, _value, _destructureObjects);
+        logEvent.AddPropertyIfAbsent(property);
     }
 }

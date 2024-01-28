@@ -15,26 +15,24 @@
 using Serilog.Core;
 using Serilog.Events;
 using System.Collections;
-using System.Linq;
 
-namespace Seq.Extensions.Logging
+namespace Seq.Extensions.Logging;
+
+class ExceptionDataEnricher : ILogEventEnricher
 {
-    class ExceptionDataEnricher : ILogEventEnricher
+    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-        {
-            var exceptionData = logEvent.Exception?.GetBaseException().Data;
-            if (exceptionData == null || exceptionData.Count == 0)
-                return;
+        var exceptionData = logEvent.Exception?.GetBaseException().Data;
+        if (exceptionData == null || exceptionData.Count == 0)
+            return;
 
-            var data = exceptionData
-                .Cast<DictionaryEntry>()
-                .Where(e => e.Key is string)
-                .Select(e => propertyFactory.CreateProperty((string)e.Key, e.Value));
+        var data = exceptionData
+            .Cast<DictionaryEntry>()
+            .Where(e => e.Key is string)
+            .Select(e => propertyFactory.CreateProperty((string)e.Key, e.Value));
 
-            var property = new LogEventProperty("ExceptionData", new StructureValue(data));
+        var property = new LogEventProperty("ExceptionData", new StructureValue(data));
 
-            logEvent.AddPropertyIfAbsent(property);
-        }
+        logEvent.AddPropertyIfAbsent(property);
     }
 }

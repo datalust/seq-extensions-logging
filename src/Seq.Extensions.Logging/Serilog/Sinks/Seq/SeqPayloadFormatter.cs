@@ -12,69 +12,65 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using Seq.Extensions.Logging;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Json;
 
-namespace Serilog.Sinks.Seq
+namespace Serilog.Sinks.Seq;
+
+static class SeqPayloadFormatter
 {
-    static class SeqPayloadFormatter
+    static readonly JsonValueFormatter JsonValueFormatter = new("$type");
+
+    public static string FormatCompactPayload(IEnumerable<LogEvent> events, long? eventBodyLimitBytes)
     {
-        static readonly JsonValueFormatter JsonValueFormatter = new("$type");
-        
-        public static string FormatCompactPayload(IEnumerable<LogEvent> events, long? eventBodyLimitBytes)
+        var payload = new StringWriter();
+
+        foreach (var logEvent in events)
         {
-            var payload = new StringWriter();
+            var buffer = new StringWriter();
 
-            foreach (var logEvent in events)
+            try
             {
-                var buffer = new StringWriter();
-
-                try
-                {
-                    CompactJsonFormatter.FormatEvent(logEvent, buffer, JsonValueFormatter);
-                }
-                catch (Exception ex)
-                {
-                    LogNonFormattableEvent(logEvent, ex);
-                    continue;
-                }
-
-                var json = buffer.ToString();
-                if (CheckEventBodySize(json, eventBodyLimitBytes))
-                {
-                    payload.WriteLine(json);
-                }
+                CompactJsonFormatter.FormatEvent(logEvent, buffer, JsonValueFormatter);
+            }
+            catch (Exception ex)
+            {
+                LogNonFormattableEvent(logEvent, ex);
+                continue;
             }
 
-            return payload.ToString();
+            var json = buffer.ToString();
+            if (CheckEventBodySize(json, eventBodyLimitBytes))
+            {
+                payload.WriteLine(json);
+            }
         }
 
-        static void LogNonFormattableEvent(LogEvent logEvent, Exception ex)
+        return payload.ToString();
+    }
+
+    static void LogNonFormattableEvent(LogEvent logEvent, Exception ex)
+    {
+        SelfLog.WriteLine(
+            "Event at {0} with message template {1} could not be formatted into JSON for Seq and will be dropped: {2}",
+            logEvent.Timestamp.ToString("o"), logEvent.MessageTemplate.Text, ex);
+    }
+
+    static bool CheckEventBodySize(string json, long? eventBodyLimitBytes)
+    {
+        if (eventBodyLimitBytes.HasValue &&
+            Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
         {
             SelfLog.WriteLine(
-                "Event at {0} with message template {1} could not be formatted into JSON for Seq and will be dropped: {2}",
-                logEvent.Timestamp.ToString("o"), logEvent.MessageTemplate.Text, ex);
+                "Event JSON representation exceeds the byte size limit of {0} set for this Seq sink and will be dropped; data: {1}",
+                eventBodyLimitBytes, json);
+            return false;
         }
 
-        static bool CheckEventBodySize(string json, long? eventBodyLimitBytes)
-        {
-            if (eventBodyLimitBytes.HasValue &&
-                Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
-            {
-                SelfLog.WriteLine(
-                    "Event JSON representation exceeds the byte size limit of {0} set for this Seq sink and will be dropped; data: {1}",
-                    eventBodyLimitBytes, json);
-                return false;
-            }
-
-            return true;
-        }
-
+        return true;
     }
+
 }

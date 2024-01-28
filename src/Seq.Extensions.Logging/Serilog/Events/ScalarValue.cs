@@ -12,106 +12,103 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Globalization;
-using System.IO;
 
-namespace Serilog.Events
+namespace Serilog.Events;
+
+/// <summary>
+/// A property value corresponding to a simple, scalar type.
+/// </summary>
+class ScalarValue : LogEventPropertyValue
 {
     /// <summary>
-    /// A property value corresponding to a simple, scalar type.
+    /// Construct a <see cref="ScalarValue"/> with the specified
+    /// value.
     /// </summary>
-    class ScalarValue : LogEventPropertyValue
+    /// <param name="value">The value, which may be <code>null</code>.</param>
+    public ScalarValue(object value)
     {
-        /// <summary>
-        /// Construct a <see cref="ScalarValue"/> with the specified
-        /// value.
-        /// </summary>
-        /// <param name="value">The value, which may be <code>null</code>.</param>
-        public ScalarValue(object value)
+        Value = value;
+    }
+
+    /// <summary>
+    /// The value, which may be <code>null</code>.
+    /// </summary>
+    public object Value { get; }
+
+    /// <summary>
+    /// Render the value to the output.
+    /// </summary>
+    /// <param name="output">The output.</param>
+    /// <param name="format">A format string applied to the value, or null.</param>
+    /// <param name="formatProvider">A format provider to apply to the value, or null to use the default.</param>
+    /// <seealso cref="LogEventPropertyValue.ToString(string, IFormatProvider)"/>.
+    public override void Render(TextWriter output, string format = null, IFormatProvider formatProvider = null)
+    {
+        if (output == null) throw new ArgumentNullException(nameof(output));
+
+        if (Value == null)
         {
-            Value = value;
+            output.Write("null");
+            return;
         }
 
-        /// <summary>
-        /// The value, which may be <code>null</code>.
-        /// </summary>
-        public object Value { get; }
-
-        /// <summary>
-        /// Render the value to the output.
-        /// </summary>
-        /// <param name="output">The output.</param>
-        /// <param name="format">A format string applied to the value, or null.</param>
-        /// <param name="formatProvider">A format provider to apply to the value, or null to use the default.</param>
-        /// <seealso cref="LogEventPropertyValue.ToString(string, IFormatProvider)"/>.
-        public override void Render(TextWriter output, string format = null, IFormatProvider formatProvider = null)
+        var s = Value as string;
+        if (s != null)
         {
-            if (output == null) throw new ArgumentNullException(nameof(output));
-
-            if (Value == null)
+            if (format != "l")
             {
-                output.Write("null");
-                return;
-            }
-
-            var s = Value as string;
-            if (s != null)
-            {
-                if (format != "l")
-                {
-                    output.Write("\"");
-                    output.Write(s.Replace("\"", "\\\""));
-                    output.Write("\"");
-                }
-                else
-                {
-                    output.Write(s);
-                }
-                return;
-            }
-
-            if (formatProvider != null)
-            {
-                var custom = (ICustomFormatter)formatProvider.GetFormat(typeof(ICustomFormatter));
-                if (custom != null)
-                {
-                    output.Write(custom.Format(format, Value, formatProvider));
-                    return;
-                }
-            }
-
-            var f = Value as IFormattable;
-            if (f != null)
-            {
-                output.Write(f.ToString(format, formatProvider ?? CultureInfo.InvariantCulture));
+                output.Write("\"");
+                output.Write(s.Replace("\"", "\\\""));
+                output.Write("\"");
             }
             else
             {
-                output.Write(Value.ToString());
-            }                        
+                output.Write(s);
+            }
+            return;
         }
 
-        /// <summary>
-        /// Determine if this instance is equal to <paramref name="obj"/>.
-        /// </summary>
-        /// <param name="obj">The instance to compare with.</param>
-        /// <returns>True if the instances are equal; otherwise, false.</returns>
-        public override bool Equals(object obj)
+        if (formatProvider != null)
         {
-            var sv = obj as ScalarValue;
-            if (sv == null) return false;
-            return Equals(Value, sv.Value);
+            var custom = (ICustomFormatter)formatProvider.GetFormat(typeof(ICustomFormatter));
+            if (custom != null)
+            {
+                output.Write(custom.Format(format, Value, formatProvider));
+                return;
+            }
         }
 
-        /// <summary>
-        /// Get a hash code representing the value.
-        /// </summary>
-        /// <returns>The instance's hash code.</returns>
-        public override int GetHashCode()
+        var f = Value as IFormattable;
+        if (f != null)
         {
-            if (Value == null) return 0;
-            return Value.GetHashCode();
+            output.Write(f.ToString(format, formatProvider ?? CultureInfo.InvariantCulture));
         }
+        else
+        {
+            output.Write(Value.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Determine if this instance is equal to <paramref name="obj"/>.
+    /// </summary>
+    /// <param name="obj">The instance to compare with.</param>
+    /// <returns>True if the instances are equal; otherwise, false.</returns>
+    public override bool Equals(object obj)
+    {
+        var sv = obj as ScalarValue;
+        if (sv == null) return false;
+        return Equals(Value, sv.Value);
+    }
+
+    /// <summary>
+    /// Get a hash code representing the value.
+    /// </summary>
+    /// <returns>The instance's hash code.</returns>
+    public override int GetHashCode()
+    {
+        if (Value == null) return 0;
+        return Value.GetHashCode();
     }
 }
