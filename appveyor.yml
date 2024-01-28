@@ -2,14 +2,14 @@ version: '{build}'
 skip_tags: true
 image: Visual Studio 2022
 build_script:
-- ps: ./Build.ps1
+- pwsh: ./Build.ps1
 test: off
 artifacts:
 - path: artifacts/Seq.Extensions.Logging.*.nupkg
 deploy:
 - provider: NuGet
   api_key:
-    secure: 5aOb6I5NRP86KkV7nlAJmgyeuXXcrkWjZZZBPCZ7kAnw33ibgSMLdoGph3NMo0Xf
+    secure: Urj/cvXeFTl4NjNLrRJUZ2EpSak7Jq9JfswqrNBeDpFiTjkpjzsm3CgoOr8gRSBU
   skip_symbols: true
   on:
     branch: /^(main|dev)$/
