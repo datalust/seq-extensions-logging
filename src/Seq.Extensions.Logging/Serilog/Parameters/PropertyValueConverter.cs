@@ -29,8 +29,8 @@ namespace Serilog.Parameters;
 // writing a log event (roughly) in control of the cost of recording that event.
 partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventPropertyValueFactory
 {
-    readonly HashSet<Type> _builtInScalarTypes = new()
-    {
+    readonly HashSet<Type> _builtInScalarTypes =
+    [
         typeof(bool),
         typeof(char),
         typeof(byte), typeof(short), typeof(ushort), typeof(int), typeof(uint),
@@ -38,12 +38,12 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
         typeof(string),
         typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan),
         typeof(Guid), typeof(Uri)
-    };
+    ];
 
-    static IEnumerable<Type> SeqExtensionsLoggingScalarTypes() => new[]
-    {
+    static IEnumerable<Type> SeqExtensionsLoggingScalarTypes() =>
+    [
         typeof(JsonSafeString)
-    };
+    ];
 
     readonly IDestructuringPolicy[] _destructuringPolicies;
     readonly IScalarConversionPolicy[] _scalarConversionPolicies;
@@ -62,32 +62,32 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
         _propagateExceptions = false;
         _maximumStringLength = maximumStringLength;
 
-        _scalarConversionPolicies = new IScalarConversionPolicy[]
-        {
+        _scalarConversionPolicies =
+        [
             new SimpleScalarConversionPolicy(_builtInScalarTypes.Concat(SeqExtensionsLoggingScalarTypes())),
             new NullableScalarConversionPolicy(),
             new EnumScalarConversionPolicy(),
-            new ByteArrayScalarConversionPolicy(),
-        };
+            new ByteArrayScalarConversionPolicy()
+        ];
 
-        _destructuringPolicies = new IDestructuringPolicy[]
-        {
+        _destructuringPolicies =
+        [
             new DelegateDestructuringPolicy(),
             new ReflectionTypesScalarDestructuringPolicy()
-        };
+        ];
     }
 
-    public LogEventProperty CreateProperty(string name, object value, bool destructureObjects = false)
+    public LogEventProperty CreateProperty(string name, object? value, bool destructureObjects = false)
     {
         return new LogEventProperty(name, CreatePropertyValue(value, destructureObjects));
     }
 
-    public LogEventPropertyValue CreatePropertyValue(object value, bool destructureObjects = false)
+    public LogEventPropertyValue CreatePropertyValue(object? value, bool destructureObjects = false)
     {
         return CreatePropertyValue(value, destructureObjects, 1);
     }
 
-    public LogEventPropertyValue CreatePropertyValue(object value, Destructuring destructuring)
+    public LogEventPropertyValue CreatePropertyValue(object? value, Destructuring destructuring)
     {
         try
         {
@@ -104,7 +104,7 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
         }
     }
 
-    LogEventPropertyValue CreatePropertyValue(object value, bool destructureObjects, int depth)
+    LogEventPropertyValue CreatePropertyValue(object? value, bool destructureObjects, int depth)
     {
         return CreatePropertyValue(
             value,
@@ -114,7 +114,7 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
             depth);
     }
 
-    LogEventPropertyValue CreatePropertyValue(object value, Destructuring destructuring, int depth)
+    LogEventPropertyValue CreatePropertyValue(object? value, Destructuring destructuring, int depth)
     {
         if (value == null)
             return new ScalarValue(null);
@@ -129,8 +129,7 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
 
         if (destructuring == Destructuring.Destructure)
         {
-            var stringValue = value as string;
-            if (stringValue != null)
+            if (value is string stringValue)
             {
                 value = TruncateIfNecessary(stringValue);
             }
@@ -138,8 +137,7 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
 
         foreach (var scalarConversionPolicy in _scalarConversionPolicies)
         {
-            ScalarValue converted;
-            if (scalarConversionPolicy.TryConvertToScalar(value, limiter, out converted))
+            if (scalarConversionPolicy.TryConvertToScalar(value, limiter, out var converted))
                 return converted;
         }
 
@@ -147,14 +145,12 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
         {
             foreach (var destructuringPolicy in _destructuringPolicies)
             {
-                LogEventPropertyValue result;
-                if (destructuringPolicy.TryDestructure(value, limiter, out result))
+                if (destructuringPolicy.TryDestructure(value, limiter, out var result))
                     return result;
             }
         }
 
-        var enumerable = value as IEnumerable;
-        if (enumerable != null)
+        if (value is IEnumerable enumerable)
         {
             // Only dictionaries with 'scalar' keys are permitted, as
             // more complex keys may not serialize to unique values for
@@ -167,10 +163,10 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
             if (IsValueTypeDictionary(valueType))
             {
                 var typeInfo = typeof(KeyValuePair<,>).MakeGenericType(valueType.GenericTypeArguments).GetTypeInfo();
-                var keyProperty = typeInfo.GetDeclaredProperty("Key");
-                var valueProperty = typeInfo.GetDeclaredProperty("Value");
+                var keyProperty = typeInfo.GetDeclaredProperty("Key")!;
+                var valueProperty = typeInfo.GetDeclaredProperty("Value")!;
 
-                return new DictionaryValue(enumerable.Cast<object>()
+                return new DictionaryValue(enumerable.Cast<object?>()
                     .Select(kvp => new KeyValuePair<ScalarValue, LogEventPropertyValue>(
                         (ScalarValue)limiter.CreatePropertyValue(keyProperty.GetValue(kvp), destructuring),
                         limiter.CreatePropertyValue(valueProperty.GetValue(kvp), destructuring)))
@@ -198,7 +194,7 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
 
     LogEventPropertyValue Stringify(object value)
     {
-        var stringified = value.ToString();
+        var stringified = value.ToString()!;
         var truncated = TruncateIfNecessary(stringified);
         return new ScalarValue(truncated);
     }
@@ -230,7 +226,7 @@ partial class PropertyValueConverter : ILogEventPropertyFactory, ILogEventProper
     {
         foreach (var prop in value.GetType().GetPropertiesRecursive())
         {
-            object propValue;
+            object? propValue;
             try
             {
                 propValue = prop.GetValue(value);

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Serilog.Events;
 
@@ -21,7 +22,7 @@ namespace Serilog.Parsing;
 /// Parses message template strings into sequences of text or property
 /// tokens.
 /// </summary>
-class MessageTemplateParser
+static class MessageTemplateParser
 {
     /// <summary>
     /// Parse the supplied message template.
@@ -31,7 +32,7 @@ class MessageTemplateParser
     /// is not syntactically valid, text tokens will be returned. The parser
     /// will make a best effort to extract valid property tokens even in the
     /// presence of parsing issues.</returns>
-    public MessageTemplate Parse(string messageTemplate)
+    public static MessageTemplate Parse(string messageTemplate)
     {
         if (messageTemplate == null)
             throw new ArgumentNullException(nameof(messageTemplate));
@@ -42,7 +43,7 @@ class MessageTemplateParser
     {
         if (messageTemplate.Length == 0)
         {
-            yield return new TextToken("", 0);
+            yield return new TextToken("");
             yield break;
         }
 
@@ -77,7 +78,7 @@ class MessageTemplateParser
         if (startAt == messageTemplate.Length || messageTemplate[startAt] != '}')
         {
             next = startAt;
-            return new TextToken(messageTemplate.Substring(first, next - first), first);
+            return new TextToken(messageTemplate.Substring(first, next - first));
         }
 
         next = startAt + 1;
@@ -85,25 +86,23 @@ class MessageTemplateParser
         var rawText = messageTemplate.Substring(first, next - first);
         var tagContent = rawText.Substring(1, next - (first + 2));
         if (tagContent.Length == 0)
-            return new TextToken(rawText, first);
+            return new TextToken(rawText);
 
-        string propertyNameAndDestructuring, format, alignment;
-        if (!TrySplitTagContent(tagContent, out propertyNameAndDestructuring, out format, out alignment))
-            return new TextToken(rawText, first);
+        if (!TrySplitTagContent(tagContent, out var propertyNameAndDestructuring, out var format, out var alignment))
+            return new TextToken(rawText);
 
         var propertyName = propertyNameAndDestructuring;
-        Destructuring destructuring;
-        if (TryGetDestructuringHint(propertyName[0], out destructuring))
+        if (TryGetDestructuringHint(propertyName[0], out var destructuring))
             propertyName = propertyName.Substring(1);
 
         if (propertyName.Length == 0)
-            return new TextToken(rawText, first);
+            return new TextToken(rawText);
 
         for (var i = 0; i < propertyName.Length; ++i)
         {
             var c = propertyName[i];
             if (!IsValidInPropertyName(c))
-                return new TextToken(rawText, first);
+                return new TextToken(rawText);
         }
 
         if (format != null)
@@ -112,7 +111,7 @@ class MessageTemplateParser
             {
                 var c = format[i];
                 if (!IsValidInFormat(c))
-                    return new TextToken(rawText, first);
+                    return new TextToken(rawText);
             }
         }
 
@@ -123,19 +122,19 @@ class MessageTemplateParser
             {
                 var c = alignment[i];
                 if (!IsValidInAlignment(c))
-                    return new TextToken(rawText, first);
+                    return new TextToken(rawText);
             }
 
             var lastDash = alignment.LastIndexOf('-');
             if (lastDash > 0)
-                return new TextToken(rawText, first);
+                return new TextToken(rawText);
 
             var width = lastDash == -1 ?
                 int.Parse(alignment) :
                 int.Parse(alignment.Substring(1));
 
             if (width == 0)
-                return new TextToken(rawText, first);
+                return new TextToken(rawText);
 
             var direction = lastDash == -1 ?
                 AlignmentDirection.Right :
@@ -149,11 +148,10 @@ class MessageTemplateParser
             rawText,
             format,
             alignmentValue,
-            destructuring,
-            first);
+            destructuring);
     }
 
-    static bool TrySplitTagContent(string tagContent, out string propertyNameAndDestructuring, out string format, out string alignment)
+    static bool TrySplitTagContent(string tagContent, [NotNullWhen(true)] out string? propertyNameAndDestructuring, out string? format, out string? alignment)
     {
         var formatDelim = tagContent.IndexOf(':');
         var alignmentDelim = tagContent.IndexOf(',');
@@ -299,6 +297,6 @@ class MessageTemplateParser
         } while (startAt < messageTemplate.Length);
 
         next = startAt;
-        return new TextToken(accum.ToString(), first);
+        return new TextToken(accum.ToString());
     }
 }

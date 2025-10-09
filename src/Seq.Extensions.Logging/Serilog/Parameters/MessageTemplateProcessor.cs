@@ -15,13 +15,12 @@
 using Serilog.Core;
 using Serilog.Core.Pipeline;
 using Serilog.Events;
-using Serilog.Parsing;
 
 namespace Serilog.Parameters;
 
-class MessageTemplateProcessor : ILogEventPropertyFactory
+class MessageTemplateProcessor : ILogEventPropertyFactory, ILogEventPropertyValueFactory
 {
-    readonly MessageTemplateCache _parser = new MessageTemplateCache(new MessageTemplateParser());
+    readonly MessageTemplateCache _parser = new();
     readonly PropertyBinder _propertyBinder;
     readonly PropertyValueConverter _propertyValueConverter;
 
@@ -31,13 +30,22 @@ class MessageTemplateProcessor : ILogEventPropertyFactory
         _propertyBinder = new PropertyBinder(_propertyValueConverter);
     }
 
-    public void Process(string messageTemplate, object[] messageTemplateParameters, out MessageTemplate parsedTemplate, out IEnumerable<LogEventProperty> properties)
+    public void Process(
+        string messageTemplate,
+        object?[]? messageTemplateParameters,
+        out MessageTemplate parsedTemplate,
+        out IEnumerable<LogEventProperty> properties)
     {
         parsedTemplate = _parser.Parse(messageTemplate);
         properties = _propertyBinder.ConstructProperties(parsedTemplate, messageTemplateParameters);
     }
 
-    public LogEventProperty CreateProperty(string name, object value, bool destructureObjects = false)
+    public LogEventPropertyValue  CreatePropertyValue(object? value, bool destructureObjects = false)
+    {
+        return _propertyValueConverter.CreatePropertyValue(value, destructureObjects);
+    }
+    
+    public LogEventProperty CreateProperty(string name, object? value, bool destructureObjects = false)
     {
         return _propertyValueConverter.CreateProperty(name, value, destructureObjects);
     }

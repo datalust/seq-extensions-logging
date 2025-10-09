@@ -23,8 +23,8 @@ namespace Serilog.Events;
 class LogEvent
 {
     readonly Dictionary<string, LogEventPropertyValue> _properties;
-    ActivityTraceId _traceId;
-    ActivitySpanId _spanId;
+    readonly ActivityTraceId _traceId;
+    readonly ActivitySpanId _spanId;
 
     /// <summary>
     /// Construct a new <seealso cref="LogEvent"/>.
@@ -39,22 +39,19 @@ class LogEvent
     public LogEvent(
         DateTimeOffset timestamp,
         LogLevel level,
-        Exception exception,
+        Exception? exception,
         MessageTemplate messageTemplate,
-        IEnumerable<LogEventProperty> properties,
+        Dictionary<string, LogEventPropertyValue> properties,
         ActivityTraceId traceId,
         ActivitySpanId spanId)
     {
-        if (properties == null) throw new ArgumentNullException(nameof(properties));
         _traceId = traceId;
         _spanId = spanId;
         Timestamp = timestamp;
         Level = level;
         Exception = exception;
-        MessageTemplate = messageTemplate ?? throw new ArgumentNullException(nameof(messageTemplate));
-        _properties = new Dictionary<string, LogEventPropertyValue>();
-        foreach (var p in properties)
-            AddOrUpdateProperty(p);
+        MessageTemplate = messageTemplate;
+        _properties = properties;
     }
 
     /// <summary>
@@ -88,7 +85,7 @@ class LogEvent
     /// </summary>
     /// <param name="output">The output.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-    public void RenderMessage(TextWriter output, IFormatProvider formatProvider = null)
+    public void RenderMessage(TextWriter output, IFormatProvider? formatProvider = null)
     {
         MessageTemplate.Render(Properties, output, formatProvider);
     }
@@ -98,7 +95,7 @@ class LogEvent
     /// with the event, and return the result.
     /// </summary>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-    public string RenderMessage(IFormatProvider formatProvider = null)
+    public string RenderMessage(IFormatProvider? formatProvider = null)
     {
         return MessageTemplate.Render(Properties, formatProvider);
     }
@@ -111,38 +108,24 @@ class LogEvent
     /// <summary>
     /// An exception associated with the event, or null.
     /// </summary>
-    public Exception Exception { get; }
+    public Exception? Exception { get; }
 
     /// <summary>
     /// Add a property to the event if not already present, otherwise, update its value.
     /// </summary>
-    /// <param name="property">The property to add or update.</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public void AddOrUpdateProperty(LogEventProperty property)
+    public void AddOrUpdateProperty(string propertyName, LogEventPropertyValue propertyValue)
     {
-        if (property == null) throw new ArgumentNullException(nameof(property));
-        _properties[property.Name] = property.Value;
+        _properties[propertyName] = propertyValue;
     }
 
     /// <summary>
     /// Add a property to the event if not already present.
     /// </summary>
-    /// <param name="property">The property to add.</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public void AddPropertyIfAbsent(LogEventProperty property)
+    public void AddPropertyIfAbsent(string propertyName, LogEventPropertyValue propertyValue)
     {
-        if (property == null) throw new ArgumentNullException(nameof(property));
-        if (!_properties.ContainsKey(property.Name))
-            _properties.Add(property.Name, property.Value);
-    }
-
-    /// <summary>
-    /// Remove a property from the event, if present. Otherwise no action
-    /// is performed.
-    /// </summary>
-    /// <param name="propertyName">The name of the property to remove.</param>
-    public void RemovePropertyIfPresent(string propertyName)
-    {
-        _properties.Remove(propertyName);
+        if (!_properties.ContainsKey(propertyName))
+            _properties.Add(propertyName, propertyValue);
     }
 }

@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace Seq.Extensions.Logging;
+﻿namespace Seq.Extensions.Logging;
 
 /// <summary>
 /// A wrapper type that marks a string as containing valid JSON that's safe to include as-is in log events.

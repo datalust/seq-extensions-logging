@@ -41,7 +41,7 @@ class LoggingLevelSwitch
     // so needs to be used judiciously in the logging pipeline.
     public LogLevel MinimumLevel
     {
-        get { return _minimumLevel; }
-        set { _minimumLevel = value; }
+        get => _minimumLevel;
+        set => _minimumLevel = value;
     }
 }

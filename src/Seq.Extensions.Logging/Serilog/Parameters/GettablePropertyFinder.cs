@@ -16,7 +16,7 @@ using System.Reflection;
 
 namespace Serilog.Parameters;
 
-static class GetablePropertyFinder
+static class GettablePropertyFinder
 {
     internal static IEnumerable<PropertyInfo> GetPropertiesRecursive(this Type type)
     {
@@ -27,7 +27,7 @@ static class GetablePropertyFinder
         while (currentTypeInfo.AsType() != typeof(object))
         {
             var unseenProperties = currentTypeInfo.DeclaredProperties.Where(p => p.CanRead &&
-                p.GetMethod.IsPublic && !p.GetMethod.IsStatic &&
+                p.GetMethod!.IsPublic && !p.GetMethod.IsStatic &&
                 (p.Name != "Item" || p.GetIndexParameters().Length == 0) && !seenNames.Contains(p.Name));
 
             foreach (var propertyInfo in unseenProperties)
@@ -36,7 +36,7 @@ static class GetablePropertyFinder
                 yield return propertyInfo;
             }
 
-            currentTypeInfo = currentTypeInfo.BaseType.GetTypeInfo();
+            currentTypeInfo = currentTypeInfo.BaseType!.GetTypeInfo();
         }
     }
 }

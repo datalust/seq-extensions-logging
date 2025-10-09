@@ -1,14 +1,10 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections;
 using Serilog.Events;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using Xunit;
 using Serilog.Extensions.Logging;
 using Seq.Extensions.Logging;
@@ -30,11 +26,11 @@ public class SerilogLoggerTests
     const string Name = "test";
     const string TestMessage = "This is a test";
 
-    static (SerilogLogger logger, SerilogSink sink) SetUp(LogLevel logLevel)
+    static (SerilogLogger logger, SerilogSink sink) SetUp(LogLevel logLevel, params Action<EnrichingEvent>[] enrichers)
     {
         var sink = new SerilogSink();
 
-        var l = new global::Serilog.Core.Logger(new global::Serilog.Core.LoggingLevelSwitch(logLevel), sink);
+        var l = new global::Serilog.Core.Logger(sink, new Enricher(enrichers), null, new global::Serilog.Core.LoggingLevelSwitch(logLevel));
 
         var provider = new SerilogLoggerProvider(l);
         provider.SetScopeProvider(new LoggerExternalScopeProvider());
@@ -111,6 +107,19 @@ public class SerilogLoggerTests
     [InlineData(LogLevel.Critical, LogLevel.Warning, 0)]
     [InlineData(LogLevel.Critical, LogLevel.Error, 0)]
     [InlineData(LogLevel.Critical, LogLevel.Critical, 1)]
+    [InlineData(LogLevel.None, LogLevel.Trace, 0)]
+    [InlineData(LogLevel.None, LogLevel.Debug, 0)]
+    [InlineData(LogLevel.None, LogLevel.Information, 0)]
+    [InlineData(LogLevel.None, LogLevel.Warning, 0)]
+    [InlineData(LogLevel.None, LogLevel.Error, 0)]
+    [InlineData(LogLevel.None, LogLevel.Critical, 0)]
+    [InlineData(LogLevel.None, LogLevel.None, 0)]
+    [InlineData(LogLevel.Critical, LogLevel.None, 0)]
+    [InlineData(LogLevel.Error, LogLevel.None, 0)]
+    [InlineData(LogLevel.Warning, LogLevel.None, 0)]
+    [InlineData(LogLevel.Information, LogLevel.None, 0)]
+    [InlineData(LogLevel.Debug, LogLevel.None, 0)]
+    [InlineData(LogLevel.Trace, LogLevel.None, 0)]
     public void LogsWhenEnabled(LogLevel minLevel, LogLevel logLevel, int expected)
     {
         var (logger, sink) = SetUp(minLevel);
@@ -125,13 +134,13 @@ public class SerilogLoggerTests
     {
         var (logger, sink) = SetUp(LogLevel.Trace);
 
-        logger.Log<object>(LogLevel.Information, 0, null, null, null!);
+        logger.Log<object?>(LogLevel.Information, 0, null, null, null!);
         logger.Log(LogLevel.Information, 0, TestMessage, null, null!);
-        logger.Log<object>(LogLevel.Information, 0, null, null, (_, _) => TestMessage);
+        logger.Log<object?>(LogLevel.Information, 0, null, null, (_, _) => TestMessage);
 
         Assert.Equal(3, sink.Writes.Count);
 
-        Assert.Equal(1, sink.Writes[0].Properties.Count);
+        Assert.Single(sink.Writes[0].Properties);
         Assert.Empty(sink.Writes[0].RenderMessage());
 
         Assert.Equal(2, sink.Writes[1].Properties.Count);
@@ -225,7 +234,13 @@ public class SerilogLoggerTests
         Assert.Equal("Hello, {Recipient}", sink.Writes[0].MessageTemplate.Text);
 
         SelfLog.Disable();
-        Assert.Empty(selfLog.ToString());
+        
+        var selfLogContent = selfLog.ToString();
+        if (!string.IsNullOrEmpty(selfLogContent))
+        {
+            // Test failures are hard to diagnose without the full SelfLog entry.
+            throw new Exception(selfLogContent);
+        }
     }
 
     [Fact]
@@ -242,6 +257,22 @@ public class SerilogLoggerTests
         var eventId = (StructureValue)sink.Writes[0].Properties["EventId"];
         var id = (ScalarValue)eventId.Properties.Single(p => p.Name == "Id").Value;
         Assert.Equal(42, id.Value);
+    }
+
+    [Fact]
+    public void OverridesStateEventIdIfSpecified()
+    {
+        var (logger, sink) = SetUp(LogLevel.Trace);
+
+        const int expected = 3;
+        
+        logger.Log<KeyValuePair<string, object>[]>(LogLevel.Information, expected, state: [new("EventId", "Something")], exception: null, formatter: (_, _) => "");
+        
+        Assert.Single(sink.Writes);
+
+        var eventId = (StructureValue)sink.Writes[0].Properties["EventId"];
+        var id = (ScalarValue)eventId.Properties.Single(p => p.Name == "Id").Value;
+        Assert.Equal(expected, id.Value);
     }
 
     [Fact]
@@ -357,6 +388,21 @@ public class SerilogLoggerTests
         Assert.Equal(activity.SpanId, single.SpanId);
     }
 
+    [Fact]
+    public void EnrichersAreApplied()
+    {
+        var (logger, sink) = SetUp(
+            LogLevel.Trace,
+            evt => evt.AddPropertyIfAbsent("EnrichedScalar", true),
+            evt => evt.AddPropertyIfAbsent("EnrichedObject", new { a = 1 }, true)
+        );
+
+        logger.Log(LogLevel.Information, 0, TestMessage, null, null!);
+
+        Assert.Equal(true, ((ScalarValue)sink.Writes[0].Properties["EnrichedScalar"]).Value);
+        Assert.Equal(1, ((ScalarValue)((StructureValue)sink.Writes[0].Properties["EnrichedObject"]).Properties[0].Value).Value);
+    }
+
     class FoodScope : IEnumerable<KeyValuePair<string, object>>
     {
         readonly string _name;
@@ -400,8 +446,8 @@ public class SerilogLoggerTests
     class Person
     {
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
     }
 }

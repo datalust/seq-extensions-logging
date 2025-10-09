@@ -26,7 +26,7 @@ class SeqSink : IBatchedLogEventSink, IDisposable
 
     static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
 
-    readonly string _apiKey;
+    readonly string? _apiKey;
     readonly long? _eventBodyLimitBytes;
     readonly HttpClient _httpClient;
 
@@ -35,10 +35,10 @@ class SeqSink : IBatchedLogEventSink, IDisposable
 
     public SeqSink(
         string serverUrl,
-        string apiKey,
+        string? apiKey,
         long? eventBodyLimitBytes,
-        ControlledLevelSwitch controlledSwitch,
-        HttpMessageHandler messageHandler)
+        ControlledLevelSwitch? controlledSwitch,
+        HttpMessageHandler? messageHandler)
     {
         if (serverUrl == null) throw new ArgumentNullException(nameof(serverUrl));
         _controlledSwitch = controlledSwitch ?? throw new ArgumentNullException(nameof(controlledSwitch));
@@ -60,7 +60,7 @@ class SeqSink : IBatchedLogEventSink, IDisposable
         if (_controlledSwitch.IsActive &&
             _nextRequiredLevelCheckUtc < DateTime.UtcNow)
         {
-            await EmitBatchAsync(Enumerable.Empty<LogEvent>());
+            await EmitBatchAsync([]);
         }
     }
 

@@ -27,7 +27,7 @@ class SafeAggregateEnricher : ILogEventEnricher
         _enrichers = enrichers.ToArray();
     }
 
-    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    public void Enrich(LogEvent logEvent, ILogEventPropertyValueFactory propertyFactory)
     {
         foreach (var enricher in _enrichers)
         {

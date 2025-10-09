@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics.CodeAnalysis;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -24,7 +25,7 @@ class ByteArrayScalarConversionPolicy : IScalarConversionPolicy
 {
     const int MaximumByteArrayLength = 1024;
 
-    public bool TryConvertToScalar(object value, ILogEventPropertyValueFactory propertyValueFactory, out ScalarValue result)
+    public bool TryConvertToScalar(object value, ILogEventPropertyValueFactory propertyValueFactory, [NotNullWhen(true)] out ScalarValue? result)
     {
         var bytes = value as byte[];
         if (bytes == null)

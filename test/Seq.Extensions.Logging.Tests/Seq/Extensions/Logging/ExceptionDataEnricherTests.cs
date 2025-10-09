@@ -1,7 +1,5 @@
 ﻿using Seq.Extensions.Logging;
 using Serilog.Events;
-using System;
-using System.Linq;
 using Tests.Support;
 using Xunit;
 
@@ -16,16 +14,16 @@ public class ExceptionDataEnricherTests
         var exception = new Exception();
         var evt = Some.ErrorEvent(exception);
 
-        enricher.Enrich(evt, Some.PropertyFactory());
+        enricher.Enrich(evt, Some.PropertyValueFactory());
 
-        Assert.Equal(0, evt.Properties.Count);
+        Assert.Empty(evt.Properties);
     }
 
     [Fact]
     public void WhenDataIsPresentThePropertyIsAdded()
     {
         var enricher = new ExceptionDataEnricher();
-        var exception = new Exception()
+        var exception = new Exception
         {
             Data =
             {
@@ -35,9 +33,9 @@ public class ExceptionDataEnricherTests
         };
         var evt = Some.ErrorEvent(exception);
 
-        enricher.Enrich(evt, Some.PropertyFactory());
+        enricher.Enrich(evt, Some.PropertyValueFactory());
 
-        Assert.Equal(1, evt.Properties.Count);
+        Assert.Single(evt.Properties);
         var data = evt.Properties["ExceptionData"];
         var value = Assert.IsType<StructureValue>(data);
         Assert.Equal(2, value.Properties.Count);

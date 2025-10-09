@@ -32,24 +32,14 @@ class MessageTemplate
     /// <summary>
     /// Construct a message template using manually-defined text and property tokens.
     /// </summary>
-    /// <param name="tokens">The text and property tokens defining the template.</param>
-    public MessageTemplate(IEnumerable<MessageTemplateToken> tokens)
-        : this(string.Join("", tokens), tokens)
-    {
-    }
-
-    /// <summary>
-    /// Construct a message template using manually-defined text and property tokens.
-    /// </summary>
     /// <param name="text">The full text of the template; used by Serilog internally to avoid unneeded
     /// string concatenation.</param>
     /// <param name="tokens">The text and property tokens defining the template.</param>
     public MessageTemplate(string text, IEnumerable<MessageTemplateToken> tokens)
     {
-        if (text == null) throw new ArgumentNullException(nameof(text));
         if (tokens == null) throw new ArgumentNullException(nameof(tokens));
 
-        Text = text;
+        Text = text ?? throw new ArgumentNullException(nameof(text));
         _tokens = tokens.ToArray();
 
         var propertyTokens = GetElementsOfTypeToArray<PropertyToken>(_tokens);
@@ -82,14 +72,13 @@ class MessageTemplate
     /// <summary>
     /// Similar to <see cref="Enumerable.OfType{TResult}"/>, but faster.
     /// </summary>
-    static TResult[] GetElementsOfTypeToArray<TResult>(object[] tokens)
+    static TResult[] GetElementsOfTypeToArray<TResult>(MessageTemplateToken[] tokens)
         where TResult : class
     {
         var result = new List<TResult>(tokens.Length / 2);
         for (var i = 0; i < tokens.Length; i++)
         {
-            var token = tokens[i] as TResult;
-            if (token != null)
+            if (tokens[i] is TResult token)
             {
                 result.Add(token);
             }
@@ -116,9 +105,9 @@ class MessageTemplate
     /// </summary>
     public IEnumerable<MessageTemplateToken> Tokens => _tokens;
 
-    internal PropertyToken[] NamedProperties { get; }
+    internal PropertyToken[]? NamedProperties { get; }
 
-    internal PropertyToken[] PositionalProperties { get; }
+    internal PropertyToken[]? PositionalProperties { get; }
 
     /// <summary>
     /// Convert the message template into a textual message, given the
@@ -129,7 +118,7 @@ class MessageTemplate
     /// <returns>The message created from the template and properties. If the
     /// properties are mismatched with the template, the template will be
     /// returned with incomplete substitution.</returns>
-    public string Render(IReadOnlyDictionary<string, LogEventPropertyValue> properties, IFormatProvider formatProvider = null)
+    public string Render(IReadOnlyDictionary<string, LogEventPropertyValue> properties, IFormatProvider? formatProvider = null)
     {
         var writer = new StringWriter(formatProvider);
         Render(properties, writer, formatProvider);
@@ -145,7 +134,7 @@ class MessageTemplate
     /// properties are mismatched with the template, the template will be
     /// returned with incomplete substitution.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-    public void Render(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output, IFormatProvider formatProvider = null)
+    public void Render(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output, IFormatProvider? formatProvider = null)
     {
         foreach (var token in _tokens)
         {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Serilog.Sinks.PeriodicBatching;
 
@@ -20,7 +21,7 @@ class BoundedConcurrentQueue<T>
 {
     const int Unbounded = -1;
 
-    readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+    readonly ConcurrentQueue<T> _queue = new();
     readonly int _queueLimit;
 
     int _counter;
@@ -33,9 +34,7 @@ class BoundedConcurrentQueue<T>
         _queueLimit = queueLimit ?? Unbounded;
     }
 
-    public int Count => _queue.Count;
-
-    public bool TryDequeue(out T item)
+    public bool TryDequeue([MaybeNullWhen(false)] out T item)
     {
         if (_queueLimit == Unbounded)
             return _queue.TryDequeue(out item);

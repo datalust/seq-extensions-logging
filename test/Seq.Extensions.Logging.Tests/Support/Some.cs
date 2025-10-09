@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using Serilog.Events;
+﻿using Serilog.Events;
 using Xunit.Sdk;
 using Serilog.Core;
 using Microsoft.Extensions.Logging;
@@ -12,33 +9,45 @@ namespace Tests.Support;
 
 static class Some
 {
-    public static LogEvent LogEvent(string messageTemplate, params object[] propertyValues)
+    public static LogEvent EmptyLogEvent()
+    {
+        return new LogEvent(
+            default,
+            default,
+            null,
+            new MessageTemplate("", []),
+            new(),
+            default,
+            default
+        );
+    }
+    
+    public static LogEvent LogEvent(string messageTemplate, params object?[] propertyValues)
     {
         return LogEvent(null, messageTemplate, propertyValues);
     }
 
-    public static LogEvent LogEvent(Exception exception, string messageTemplate, params object[] propertyValues)
+    public static LogEvent LogEvent(Exception? exception, string messageTemplate, params object?[] propertyValues)
     {
         return LogEvent(LogLevel.Information, exception, messageTemplate, propertyValues);
     }
 
-    public static ILogEventPropertyFactory PropertyFactory()
+    public static ILogEventPropertyValueFactory PropertyValueFactory()
     {
         return new PropertyValueConverter(10, 1024);
     }
 
-    public static LogEvent LogEvent(LogLevel level, Exception exception, string messageTemplate, params object[] propertyValues)
+    public static LogEvent LogEvent(LogLevel level, Exception? exception, string messageTemplate, params object?[] propertyValues)
     {
-        var log = new Logger(null, null, null);
-        MessageTemplate template;
-        IEnumerable<LogEventProperty> properties;
+        var log = new Logger(null!, null!);
 #pragma warning disable Serilog004 // Constant MessageTemplate verifier
-        if (!log.BindMessageTemplate(messageTemplate, propertyValues, out template, out properties))
+        // ReSharper disable once ConvertIfStatementToReturnStatement
+        if (!log.BindMessageTemplate(messageTemplate, propertyValues, out var template, out var properties))
 #pragma warning restore Serilog004 // Constant MessageTemplate verifier
         {
             throw new XunitException("Template could not be bound.");
         }
-        return new LogEvent(DateTimeOffset.Now, level, exception, template, properties, default, default);
+        return new LogEvent(DateTimeOffset.Now, level, exception, template, properties.ToDictionary(p => p.Name, p => p.Value), default, default);
     }
 
     public static LogEvent DebugEvent()
@@ -51,7 +60,7 @@ static class Some
         return LogEvent(LogLevel.Information, null, "Information event");
     }
 
-    public static LogEvent ErrorEvent(Exception exception = null)
+    public static LogEvent ErrorEvent(Exception? exception = null)
     {
         return LogEvent(LogLevel.Error, exception, "Error event");
     }

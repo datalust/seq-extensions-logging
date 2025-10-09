@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics.CodeAnalysis;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -19,10 +20,9 @@ namespace Serilog.Policies;
 
 class DelegateDestructuringPolicy : IDestructuringPolicy
 {
-    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue result)
+    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, [NotNullWhen(true)] out LogEventPropertyValue? result)
     {
-        var del = value as Delegate;
-        if (del != null)
+        if (value is Delegate del)
         {
             result = new ScalarValue(del.ToString());
             return true;

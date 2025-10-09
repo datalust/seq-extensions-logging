@@ -23,7 +23,7 @@ class PropertyBinder
 {
     readonly PropertyValueConverter _valueConverter;
 
-    static readonly LogEventProperty[] NoProperties = new LogEventProperty[0];
+    static readonly LogEventProperty[] NoProperties = [];
 
     public PropertyBinder(PropertyValueConverter valueConverter)
     {
@@ -38,7 +38,7 @@ class PropertyBinder
     /// represented in the message template.</param>
     /// <returns>A list of properties; if the template is malformed then
     /// this will be empty.</returns>
-    public IEnumerable<LogEventProperty> ConstructProperties(MessageTemplate messageTemplate, object[] messageTemplateParameters)
+    public IEnumerable<LogEventProperty> ConstructProperties(MessageTemplate messageTemplate, object?[]? messageTemplateParameters)
     {
         if (messageTemplateParameters == null || messageTemplateParameters.Length == 0)
         {
@@ -54,18 +54,17 @@ class PropertyBinder
         return ConstructNamedProperties(messageTemplate, messageTemplateParameters);
     }
 
-    IEnumerable<LogEventProperty> ConstructPositionalProperties(MessageTemplate template, object[] messageTemplateParameters)
+    IEnumerable<LogEventProperty> ConstructPositionalProperties(MessageTemplate template, object?[] messageTemplateParameters)
     {
         var positionalProperties = template.PositionalProperties;
 
-        if (positionalProperties.Length != messageTemplateParameters.Length)
+        if (positionalProperties!.Length != messageTemplateParameters.Length)
             SelfLog.WriteLine("Positional property count does not match parameter count: {0}", template);
 
-        var result = new LogEventProperty[messageTemplateParameters.Length];
+        var result = new LogEventProperty?[messageTemplateParameters.Length];
         foreach (var property in positionalProperties)
         {
-            int position;
-            if (property.TryGetPositionalValue(out position))
+            if (property.TryGetPositionalValue(out var position))
             {
                 if (position < 0 || position >= messageTemplateParameters.Length)
                     SelfLog.WriteLine("Unassigned positional value {0} in: {1}", position, template);
@@ -87,14 +86,14 @@ class PropertyBinder
         if (next != result.Length)
             Array.Resize(ref result, next);
 
-        return result;
+        return result!;
     }
 
-    IEnumerable<LogEventProperty> ConstructNamedProperties(MessageTemplate template, object[] messageTemplateParameters)
+    IEnumerable<LogEventProperty> ConstructNamedProperties(MessageTemplate template, object?[] messageTemplateParameters)
     {
         var namedProperties = template.NamedProperties;
         if (namedProperties == null)
-            return Enumerable.Empty<LogEventProperty>();
+            return [];
 
         var matchedRun = namedProperties.Length;
         if (namedProperties.Length != messageTemplateParameters.Length)
@@ -106,7 +105,7 @@ class PropertyBinder
         var result = new LogEventProperty[messageTemplateParameters.Length];
         for (var i = 0; i < matchedRun; ++i)
         {
-            var property = template.NamedProperties[i];
+            var property = template.NamedProperties![i];
             var value = messageTemplateParameters[i];
             result[i] = ConstructProperty(property, value);
         }
@@ -119,7 +118,7 @@ class PropertyBinder
         return result;
     }
 
-    LogEventProperty ConstructProperty(PropertyToken propertyToken, object value)
+    LogEventProperty ConstructProperty(PropertyToken propertyToken, object? value)
     {
         return new LogEventProperty(
             propertyToken.PropertyName,

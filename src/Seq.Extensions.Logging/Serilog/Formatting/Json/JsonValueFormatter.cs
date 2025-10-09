@@ -25,7 +25,7 @@ namespace Serilog.Formatting.Json;
 /// </summary>
 class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
 {
-    readonly string _typeTagName;
+    readonly string? _typeTagName;
 
     const string DefaultTypeTagName = "_typeTag";
 
@@ -36,7 +36,7 @@ class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
     /// the property name to use for the Serilog <see cref="StructureValue.TypeTag"/> field
     /// in the resulting JSON. If null, no type tag field will be written. The default is
     /// "_typeTag".</param>
-    public JsonValueFormatter(string typeTagName = DefaultTypeTagName)
+    public JsonValueFormatter(string? typeTagName = DefaultTypeTagName)
     {
         _typeTagName = typeTagName;
     }
@@ -136,7 +136,7 @@ class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
         {
             state.Write(delim);
             delim = ",";
-            WriteQuotedJsonString((element.Key.Value ?? "null").ToString(), state);
+            WriteQuotedJsonString((element.Key.Value ?? "null").ToString()!, state);
             state.Write(':');
             Visit(state, element.Value);
         }
@@ -152,7 +152,7 @@ class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
     /// </summary>
     /// <param name="value">The value to write.</param>
     /// <param name="output">The output</param>
-    static void FormatLiteralValue(object value, TextWriter output)
+    static void FormatLiteralValue(object? value, TextWriter output)
     {
         if (value == null)
         {
@@ -200,7 +200,7 @@ class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
 
             if (value is char)
             {
-                FormatStringValue(value.ToString(), output);
+                FormatStringValue(value.ToString()!, output);
                 return;
             }
 
@@ -274,7 +274,7 @@ class JsonValueFormatter : LogEventPropertyValueVisitor<TextWriter, bool>
     static void FormatLiteralObjectValue(object value, TextWriter output)
     {
         if (value == null) throw new ArgumentNullException(nameof(value));
-        FormatStringValue(value.ToString(), output);
+        FormatStringValue(value.ToString()!, output);
     }
 
     static void FormatStringValue(string str, TextWriter output)

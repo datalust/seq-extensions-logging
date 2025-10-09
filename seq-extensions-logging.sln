@@ -6,13 +6,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0069BFD6-B0E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "global", "global", "{B0D573D8-1AE2-4C5C-817A-95815067452E}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-		Build.ps1 = Build.ps1
 		LICENSE = LICENSE
 		README.md = README.md
 		global.json = global.json
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Build.ps1 = Build.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D54DE844-AC36-4872-928F-5F573D41ACAE}"
@@ -26,6 +26,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebExample", "example\WebExample\WebExample.csproj", "{FC44EC1F-AD83-4522-99B4-4B309B8CC78A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleExample", "example\ConsoleExample\ConsoleExample.csproj", "{3C7C4F1B-7BB1-48F6-BC9E-0A81F632458B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{98FB80CE-7AEF-4FA3-88D0-9812529BC15F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{8BCBFBF7-24E1-491A-956E-1AC7E1183270}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +65,7 @@ Global
 		{64A3F2C5-D71E-44A6-8DC7-99474765B32E} = {D54DE844-AC36-4872-928F-5F573D41ACAE}
 		{FC44EC1F-AD83-4522-99B4-4B309B8CC78A} = {1C72E771-7C72-4A30-A408-5CE66E792ADF}
 		{3C7C4F1B-7BB1-48F6-BC9E-0A81F632458B} = {1C72E771-7C72-4A30-A408-5CE66E792ADF}
+		{8BCBFBF7-24E1-491A-956E-1AC7E1183270} = {98FB80CE-7AEF-4FA3-88D0-9812529BC15F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A6DD7789-D2A5-43A4-A4FE-E138166E15C7}

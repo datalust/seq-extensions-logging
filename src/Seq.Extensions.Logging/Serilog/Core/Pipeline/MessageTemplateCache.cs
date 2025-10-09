@@ -19,32 +19,27 @@ namespace Serilog.Core.Pipeline;
 
 class MessageTemplateCache
 {
-    readonly MessageTemplateParser _innerParser;
-    readonly Dictionary<string, MessageTemplate> _templates = new Dictionary<string, MessageTemplate>();
-    readonly object _templatesLock = new object();
+    readonly Dictionary<string, MessageTemplate> _templates = new();
+    readonly object _templatesLock = new();
 
     const int MaxCacheItems = 1000;
     const int MaxCachedTemplateLength = 1024;
 
-    public MessageTemplateCache(MessageTemplateParser innerParser)
-    {
-        if (innerParser == null) throw new ArgumentNullException(nameof(innerParser));
-        _innerParser = innerParser;
-    }
 
     public MessageTemplate Parse(string messageTemplate)
     {
         if (messageTemplate == null) throw new ArgumentNullException(nameof(messageTemplate));
 
         if (messageTemplate.Length > MaxCachedTemplateLength)
-            return _innerParser.Parse(messageTemplate);
+            return MessageTemplateParser.Parse(messageTemplate);
 
-        MessageTemplate result;
         lock (_templatesLock)
-            if (_templates.TryGetValue(messageTemplate, out result))
-                return result;
+        {
+            if (_templates.TryGetValue(messageTemplate, out var found))
+                return found;
+        }
 
-        result = _innerParser.Parse(messageTemplate);
+        var result = MessageTemplateParser.Parse(messageTemplate);
 
         lock (_templatesLock)
         {

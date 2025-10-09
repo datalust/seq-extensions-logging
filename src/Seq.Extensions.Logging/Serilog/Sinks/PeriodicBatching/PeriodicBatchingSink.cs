@@ -30,7 +30,7 @@ namespace Serilog.Sinks.PeriodicBatching;
 /// that want to change this behavior need to either implement from scratch, or
 /// embed retry logic in the batch emitting functions.
 /// </remarks>
-class PeriodicBatchingSink : ILogEventSink, IDisposable, IBatchedLogEventSink
+sealed class PeriodicBatchingSink : ILogEventSink, IDisposable
 {
     /// <summary>
     /// Constant used with legacy constructor to indicate that the internal queue shouldn't be limited.
@@ -43,9 +43,9 @@ class PeriodicBatchingSink : ILogEventSink, IDisposable, IBatchedLogEventSink
     readonly bool _eagerlyEmitFirstEvent;
     readonly BoundedConcurrentQueue<LogEvent> _queue;
     readonly BatchedConnectionStatus _status;
-    readonly Queue<LogEvent> _waitingBatch = new Queue<LogEvent>();
+    readonly Queue<LogEvent> _waitingBatch = new();
 
-    readonly object _stateLock = new object();
+    readonly object _stateLock = new();
 
     readonly PortableTimer _timer;
 
@@ -60,25 +60,18 @@ class PeriodicBatchingSink : ILogEventSink, IDisposable, IBatchedLogEventSink
     /// it will dispose this object if possible.</param>
     /// <param name="options">Options controlling behavior of the sink.</param>
     public PeriodicBatchingSink(IBatchedLogEventSink batchedSink, PeriodicBatchingSinkOptions options)
-        : this(options)
     {
-        _batchedLogEventSink = batchedSink ?? throw new ArgumentNullException(nameof(batchedSink));
-    }
-
-    PeriodicBatchingSink(PeriodicBatchingSinkOptions options)
-    {
-        if (options == null) throw new ArgumentNullException(nameof(options));
-
         if (options.BatchSizeLimit <= 0)
             throw new ArgumentOutOfRangeException(nameof(options), "The batch size limit must be greater than zero.");
         if (options.Period <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(options), "The period must be greater than zero.");
 
         _batchSizeLimit = options.BatchSizeLimit;
+        _batchedLogEventSink = batchedSink ?? throw new ArgumentNullException(nameof(batchedSink));
         _queue = new BoundedConcurrentQueue<LogEvent>(options.QueueLimit);
         _status = new BatchedConnectionStatus(options.Period);
         _eagerlyEmitFirstEvent = options.EagerlyEmitFirstEvent;
-        _timer = new PortableTimer(cancel => OnTick());
+        _timer = new PortableTimer(_ => OnTick());
     }
 
     void CloseAndFlush()
@@ -97,8 +90,7 @@ class PeriodicBatchingSink : ILogEventSink, IDisposable, IBatchedLogEventSink
         // so we prevent possible deadlocks here for sync-over-async downstream implementations 
         ResetSyncContextAndWait(OnTick);
 
-        if (_batchedLogEventSink != this)
-            (_batchedLogEventSink as IDisposable)?.Dispose();
+        (_batchedLogEventSink as IDisposable)?.Dispose();
     }
 
     static void ResetSyncContextAndWait(Func<Task> taskFactory)
@@ -121,42 +113,7 @@ class PeriodicBatchingSink : ILogEventSink, IDisposable, IBatchedLogEventSink
     /// <filterpriority>2</filterpriority>
     public void Dispose()
     {
-        Dispose(true);
-    }
-
-    /// <summary>
-    /// Free resources held by the sink.
-    /// </summary>
-    /// <param name="disposing">If true, called because the object is being disposed; if false,
-    /// the object is being disposed from the finalizer.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!disposing) return;
         CloseAndFlush();
-    }
-
-    /// <summary>
-    /// Emit a batch of log events, running to completion synchronously.
-    /// </summary>
-    /// <param name="events">The events to emit.</param>
-    /// <remarks>Override either <see cref="EmitBatch"/> or <see cref="EmitBatchAsync"/>,
-    /// not both.</remarks>
-    protected virtual void EmitBatch(IEnumerable<LogEvent> events)
-    {
-    }
-
-    /// <summary>
-    /// Emit a batch of log events, running asynchronously.
-    /// </summary>
-    /// <param name="events">The events to emit.</param>
-    /// <remarks>Override either <see cref="EmitBatchAsync"/> or <see cref="EmitBatch"/>,
-    /// not both. </remarks>
-#pragma warning disable 1998
-    protected virtual async Task EmitBatchAsync(IEnumerable<LogEvent> events)
-#pragma warning restore 1998
-    {
-        // ReSharper disable once MethodHasAsyncOverload
-        EmitBatch(events);
     }
 
     async Task OnTick()
@@ -169,8 +126,7 @@ class PeriodicBatchingSink : ILogEventSink, IDisposable, IBatchedLogEventSink
                 while (_waitingBatch.Count < _batchSizeLimit &&
                        _queue.TryDequeue(out var next))
                 {
-                    if (CanInclude(next))
-                        _waitingBatch.Enqueue(next);
+                    _waitingBatch.Enqueue(next);
                 }
 
                 if (_waitingBatch.Count == 0)
@@ -261,43 +217,4 @@ class PeriodicBatchingSink : ILogEventSink, IDisposable, IBatchedLogEventSink
 
         _queue.TryEnqueue(logEvent);
     }
-
-    /// <summary>
-    /// Determine whether a queued log event should be included in the batch. If
-    /// an override returns false, the event will be dropped.
-    /// </summary>
-    /// <param name="logEvent">An event to test for inclusion.</param>
-    /// <returns>True if the event should be included in the batch; otherwise, false.</returns>
-    // ReSharper disable once UnusedParameter.Global
-    protected virtual bool CanInclude(LogEvent logEvent)
-    {
-        return true;
-    }
-
-    /// <summary>
-    /// Allows derived sinks to perform periodic work without requiring additional threads
-    /// or timers (thus avoiding additional flush/shut-down complexity).
-    /// </summary>
-    /// <remarks>Override either <see cref="OnEmptyBatch"/> or <see cref="OnEmptyBatchAsync"/>,
-    /// not both. </remarks>
-    protected virtual void OnEmptyBatch()
-    {
-    }
-
-    /// <summary>
-    /// Allows derived sinks to perform periodic work without requiring additional threads
-    /// or timers (thus avoiding additional flush/shut-down complexity).
-    /// </summary>
-    /// <remarks>Override either <see cref="OnEmptyBatchAsync"/> or <see cref="OnEmptyBatch"/>,
-    /// not both. </remarks>
-#pragma warning disable 1998
-    protected virtual async Task OnEmptyBatchAsync()
-#pragma warning restore 1998
-    {
-        // ReSharper disable once MethodHasAsyncOverload
-        OnEmptyBatch();
-    }
-
-    Task IBatchedLogEventSink.EmitBatchAsync(IEnumerable<LogEvent> batch) => EmitBatchAsync(batch);
-    Task IBatchedLogEventSink.OnEmptyBatchAsync() => OnEmptyBatchAsync();
 }

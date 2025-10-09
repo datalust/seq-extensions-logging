@@ -34,19 +34,19 @@ partial class PropertyValueConverter
             _propertyValueConverter = propertyValueConverter;
         }
 
-        public LogEventPropertyValue CreatePropertyValue(object value, Destructuring destructuring)
+        public LogEventPropertyValue CreatePropertyValue(object? value, Destructuring destructuring)
         {
             return DefaultIfMaximumDepth() ??
                 _propertyValueConverter.CreatePropertyValue(value, destructuring, _currentDepth + 1);
         }
 
-        public LogEventPropertyValue CreatePropertyValue(object value, bool destructureObjects = false)
+        public LogEventPropertyValue CreatePropertyValue(object? value, bool destructureObjects = false)
         {
             return DefaultIfMaximumDepth() ??
                 _propertyValueConverter.CreatePropertyValue(value, destructureObjects, _currentDepth + 1);
         }
 
-        LogEventPropertyValue DefaultIfMaximumDepth()
+        LogEventPropertyValue? DefaultIfMaximumDepth()
         {
             if (_currentDepth == _maximumDestructuringDepth)
             {

@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Globalization;
-using Xunit;
 using Serilog.Sinks.PeriodicBatching;
+using Xunit;
 
-namespace Seq.Extensions.Logging.Tests.Serilog.Sinks;
+namespace Tests.Serilog.Sinks;
 
 public class BatchedConnectionStatusTests
 {

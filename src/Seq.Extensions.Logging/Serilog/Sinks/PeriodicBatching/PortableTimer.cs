@@ -18,10 +18,10 @@ namespace Serilog.Sinks.PeriodicBatching;
 
 class PortableTimer : IDisposable
 {
-    readonly object _stateLock = new object();
+    readonly object _stateLock = new();
 
     readonly Func<CancellationToken, Task> _onTick;
-    readonly CancellationTokenSource _cancel = new CancellationTokenSource();
+    readonly CancellationTokenSource _cancel = new();
 
     readonly Timer _timer;
 

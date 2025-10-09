@@ -25,18 +25,10 @@ class TextToken : MessageTemplateToken
     /// Construct a <see cref="TextToken"/>.
     /// </summary>
     /// <param name="text">The text of the token.</param>
-    /// <param name="startIndex">The token's start index in the template.</param>
-    /// <exception cref="ArgumentNullException"></exception>
-    public TextToken(string text, int startIndex = -1) : base(startIndex)
+    public TextToken(string text)
     {
-        if (text == null) throw new ArgumentNullException(nameof(text));
         Text = text;
     }
-
-    /// <summary>
-    /// The token's length.
-    /// </summary>
-    public override int Length => Text.Length;
 
     /// <summary>
     /// Render the token to the output.
@@ -44,7 +36,7 @@ class TextToken : MessageTemplateToken
     /// <param name="properties">Properties that may be represented by the token.</param>
     /// <param name="output">Output for the rendered string.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-    public override void Render(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output, IFormatProvider formatProvider = null)
+    public override void Render(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output, IFormatProvider? formatProvider = null)
     {
         if (output == null) throw new ArgumentNullException(nameof(output));
         output.Write(Text);
@@ -57,7 +49,7 @@ class TextToken : MessageTemplateToken
     /// true if the specified object  is equal to the current object; otherwise, false.
     /// </returns>
     /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         var tt = obj as TextToken;
         return tt != null && tt.Text == Text;

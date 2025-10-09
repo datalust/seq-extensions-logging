@@ -9,9 +9,7 @@ namespace Serilog.Extensions.Logging;
 
 static class SerilogLoggerScope
 {
-    const string NoName = "None";
-
-    public static void EnrichAndCreateScopeItem(object state, LogEvent logEvent, ILogEventPropertyFactory propertyFactory, out LogEventPropertyValue scopeItem)
+    public static void EnrichAndCreateScopeItem(object? state, LogEvent logEvent, ILogEventPropertyValueFactory propertyFactory, out LogEventPropertyValue? scopeItem)
     {
         if (state == null)
         {
@@ -39,13 +37,13 @@ static class SerilogLoggerScope
                     destructureObject = true;
                 }
 
-                var property = propertyFactory.CreateProperty(key, stateProperty.Value, destructureObject);
-                logEvent.AddOrUpdateProperty(property);
+                var property = propertyFactory.CreatePropertyValue(stateProperty.Value, destructureObject);
+                logEvent.AddOrUpdateProperty(key, property);
             }
         }
         else
         {
-            scopeItem = propertyFactory.CreateProperty(NoName, state).Value;
+            scopeItem = propertyFactory.CreatePropertyValue(state);
         }
     }
 }

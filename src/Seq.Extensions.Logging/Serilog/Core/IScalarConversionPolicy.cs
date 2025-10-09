@@ -1,4 +1,5 @@
-﻿using Serilog.Events;
+﻿using System.Diagnostics.CodeAnalysis;
+using Serilog.Events;
 
 namespace Serilog.Core;
 
@@ -15,5 +16,5 @@ interface IScalarConversionPolicy
     /// <param name="propertyValueFactory">Recursively apply policies to convert additional values.</param>
     /// <param name="result">The converted value, or null.</param>
     /// <returns>True if the value could be converted under this policy.</returns>
-    bool TryConvertToScalar(object value, ILogEventPropertyValueFactory propertyValueFactory, out ScalarValue result);
+    bool TryConvertToScalar(object value, ILogEventPropertyValueFactory propertyValueFactory, [NotNullWhen(true)] out ScalarValue? result);
 }

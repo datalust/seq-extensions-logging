@@ -26,7 +26,7 @@ class ScalarValue : LogEventPropertyValue
     /// value.
     /// </summary>
     /// <param name="value">The value, which may be <code>null</code>.</param>
-    public ScalarValue(object value)
+    public ScalarValue(object? value)
     {
         Value = value;
     }
@@ -34,7 +34,7 @@ class ScalarValue : LogEventPropertyValue
     /// <summary>
     /// The value, which may be <code>null</code>.
     /// </summary>
-    public object Value { get; }
+    public object? Value { get; }
 
     /// <summary>
     /// Render the value to the output.
@@ -43,7 +43,7 @@ class ScalarValue : LogEventPropertyValue
     /// <param name="format">A format string applied to the value, or null.</param>
     /// <param name="formatProvider">A format provider to apply to the value, or null to use the default.</param>
     /// <seealso cref="LogEventPropertyValue.ToString(string, IFormatProvider)"/>.
-    public override void Render(TextWriter output, string format = null, IFormatProvider formatProvider = null)
+    public override void Render(TextWriter output, string? format = null, IFormatProvider? formatProvider = null)
     {
         if (output == null) throw new ArgumentNullException(nameof(output));
 
@@ -53,8 +53,7 @@ class ScalarValue : LogEventPropertyValue
             return;
         }
 
-        var s = Value as string;
-        if (s != null)
+        if (Value is string s)
         {
             if (format != "l")
             {
@@ -69,18 +68,14 @@ class ScalarValue : LogEventPropertyValue
             return;
         }
 
-        if (formatProvider != null)
+        var custom = (ICustomFormatter?)formatProvider?.GetFormat(typeof(ICustomFormatter));
+        if (custom != null)
         {
-            var custom = (ICustomFormatter)formatProvider.GetFormat(typeof(ICustomFormatter));
-            if (custom != null)
-            {
-                output.Write(custom.Format(format, Value, formatProvider));
-                return;
-            }
+            output.Write(custom.Format(format, Value, formatProvider));
+            return;
         }
 
-        var f = Value as IFormattable;
-        if (f != null)
+        if (Value is IFormattable f)
         {
             output.Write(f.ToString(format, formatProvider ?? CultureInfo.InvariantCulture));
         }
@@ -95,7 +90,7 @@ class ScalarValue : LogEventPropertyValue
     /// </summary>
     /// <param name="obj">The instance to compare with.</param>
     /// <returns>True if the instances are equal; otherwise, false.</returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         var sv = obj as ScalarValue;
         if (sv == null) return false;

@@ -20,7 +20,7 @@ class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher, ISupportExtern
     readonly Logger _logger;
     readonly Action _dispose;
 
-    IExternalScopeProvider _scopeProvider;
+    IExternalScopeProvider? _scopeProvider;
 
     /// <summary>
     /// Construct a <see cref="SerilogLoggerProvider"/>.
@@ -32,7 +32,7 @@ class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher, ISupportExtern
             throw new ArgumentNullException(nameof(logger));
 
         _dispose = logger.Dispose;
-        _logger = logger.ForContext(new[] { this });
+        _logger = logger.ForContext([this]);
     }
 
     /// <inheritdoc />
@@ -41,13 +41,13 @@ class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher, ISupportExtern
         return new SerilogLogger(this, _logger, name);
     }
 
-    public IDisposable BeginScope<T>(T state)
+    public IDisposable? BeginScope<T>(T state)
     {
         return _scopeProvider?.Push(state);
     }
 
     /// <inheritdoc />
-    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    public void Enrich(LogEvent logEvent, ILogEventPropertyValueFactory propertyFactory)
     {
         var scopeItems = new List<LogEventPropertyValue>();
 
@@ -63,7 +63,7 @@ class SerilogLoggerProvider : ILoggerProvider, ILogEventEnricher, ISupportExtern
 
         if (scopeItems.Count > 0)
         {
-            logEvent.AddPropertyIfAbsent(new LogEventProperty(ScopePropertyName, new SequenceValue(scopeItems)));
+            logEvent.AddPropertyIfAbsent(ScopePropertyName, new SequenceValue(scopeItems));
         }
     }
 

@@ -20,7 +20,7 @@ namespace Seq.Extensions.Logging;
 
 class ExceptionDataEnricher : ILogEventEnricher
 {
-    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    public void Enrich(LogEvent logEvent, ILogEventPropertyValueFactory propertyFactory)
     {
         var exceptionData = logEvent.Exception?.GetBaseException().Data;
         if (exceptionData == null || exceptionData.Count == 0)
@@ -29,10 +29,8 @@ class ExceptionDataEnricher : ILogEventEnricher
         var data = exceptionData
             .Cast<DictionaryEntry>()
             .Where(e => e.Key is string)
-            .Select(e => propertyFactory.CreateProperty((string)e.Key, e.Value));
+            .Select(e => new LogEventProperty((string)e.Key, propertyFactory.CreatePropertyValue(e.Value)));
 
-        var property = new LogEventProperty("ExceptionData", new StructureValue(data));
-
-        logEvent.AddPropertyIfAbsent(property);
+        logEvent.AddPropertyIfAbsent("ExceptionData", new StructureValue(data));
     }
 }

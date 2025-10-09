@@ -22,13 +22,12 @@ class FixedPropertyEnricher : ILogEventEnricher
 
     public FixedPropertyEnricher(LogEventProperty logEventProperty)
     {
-        if (logEventProperty == null) throw new ArgumentNullException(nameof(logEventProperty));
         _logEventProperty = logEventProperty;
     }
 
-    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    public void Enrich(LogEvent logEvent, ILogEventPropertyValueFactory propertyFactory)
     {
         if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-        logEvent.AddPropertyIfAbsent(_logEventProperty);
+        logEvent.AddPropertyIfAbsent(_logEventProperty.Name, _logEventProperty.Value);
     }
 }

@@ -20,8 +20,7 @@ public class ControlledLevelSwitchTests
     [Fact]
     public void WhenTheServerSendsNoLevelTheSwitchIsNotInitiallyAdjusted()
     {
-        var lls = new LoggingLevelSwitch(LogLevel.Warning);
-        lls.MinimumLevel = LogLevel.Critical;
+        var lls = new LoggingLevelSwitch(LogLevel.Critical);
         var cls = new ControlledLevelSwitch(lls);
         cls.Update(null);
         Assert.Equal(LogLevel.Critical, lls.MinimumLevel);
@@ -40,14 +39,14 @@ public class ControlledLevelSwitchTests
     [Fact]
     public void WithNoSwitchToControlAllEventsAreIncluded()
     {
-        var cls = new ControlledLevelSwitch(null);
+        var cls = new ControlledLevelSwitch();
         Assert.True(cls.IsIncluded(Some.DebugEvent()));
     }
 
     [Fact]
     public void WithNoSwitchToControlEventsAreStillFiltered()
     {
-        var cls = new ControlledLevelSwitch(null);
+        var cls = new ControlledLevelSwitch();
         cls.Update(LogLevel.Warning);
         Assert.True(cls.IsIncluded(Some.ErrorEvent()));
         Assert.False(cls.IsIncluded(Some.InformationEvent()));
@@ -56,7 +55,7 @@ public class ControlledLevelSwitchTests
     [Fact]
     public void WithNoSwitchToControlAllEventsAreIncludedAfterReset()
     {
-        var cls = new ControlledLevelSwitch(null);
+        var cls = new ControlledLevelSwitch();
         cls.Update(LogLevel.Warning);
         cls.Update(null);
         Assert.True(cls.IsIncluded(Some.DebugEvent()));
@@ -77,7 +76,7 @@ public class ControlledLevelSwitchTests
     }
 
     [Fact]
-    public void AfterServerControlhTheControllerIsAlwaysActive()
+    public void AfterServerControlTheControllerIsAlwaysActive()
     {
         var cls = new ControlledLevelSwitch();
 
